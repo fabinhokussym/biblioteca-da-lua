@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="blank">
+<meta name="mobile-web-app-capable" content="yes">
 <title>A Páscoa da Lua — Biblioteca da Lua</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
@@ -13,18 +16,29 @@ html, body {
   font-family: Georgia, serif;
   user-select:none; -webkit-user-select:none;
   touch-action:none;
-  background: #f0ece4;
 }
 
-#bg {
-  position:fixed; inset:0;
-  background:
-    radial-gradient(ellipse at 30% 20%, rgba(255,240,200,0.5) 0%, transparent 60%),
-    radial-gradient(ellipse at 70% 80%, rgba(255,220,180,0.4) 0%, transparent 60%),
-    linear-gradient(135deg, #fdf6ee 0%, #f5ede0 50%, #fdf0e0 100%);
-  z-index:0;
+/* ── FUNDO ── */
+body {
+  background: linear-gradient(135deg, #fdf6ee 0%, #f5ede0 50%, #fdf0e0 100%);
 }
 
+/* ── LOGO canto inferior esquerdo ── */
+#logo {
+  position:fixed; bottom:18px; left:18px; z-index:100;
+  display:flex; align-items:center; gap:6px;
+  opacity:0.7; pointer-events:none;
+  transition: opacity 0.3s;
+}
+#logo:hover { opacity:1; }
+#logo-moon { font-size:18px; }
+#logo-text {
+  font-size:10px; letter-spacing:1.8px; color:#b07040;
+  text-transform:uppercase; font-family:Georgia,serif;
+  line-height:1.2;
+}
+
+/* ── TÍTULO TOPO — só desktop ── */
 #topbar {
   position:fixed; top:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
@@ -32,37 +46,44 @@ html, body {
   pointer-events:none;
 }
 #topbar h1 {
-  font-size:15px; font-weight:normal; letter-spacing:2px;
-  color:#b07040; text-transform:uppercase; opacity:0.8;
+  font-size:13px; font-weight:normal; letter-spacing:2.5px;
+  color:#b07040; text-transform:uppercase; opacity:0.7;
 }
 
+/* ── STAGE ── */
 #stage {
   position:fixed; inset:0; z-index:10;
   display:flex; align-items:center; justify-content:center;
 }
 
+/* ── LIVRO ── */
 #bookWrap {
   position:relative;
-  width: min(88vw, 155vh);
-  height: min(49.5vw, 87.2vh);
-  filter: drop-shadow(0 20px 60px rgba(160,100,40,0.25)) drop-shadow(0 4px 12px rgba(160,100,40,0.18));
+  width: min(88vw, 152vh);
+  height: min(49.5vw, 85.5vh);
 }
 
-#bookWrap::after {
-  content:'';
+/* Sombra do livro */
+#bookShadow {
   position:absolute;
-  bottom:-18px; left:5%; right:5%; height:18px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(120,70,20,0.18) 0%, transparent 75%);
-  pointer-events:none;
+  bottom:-22px; left:4%; right:4%; height:24px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(100,60,10,0.22) 0%, transparent 72%);
+  pointer-events:none; z-index:0;
 }
 
 #book {
   position:relative;
   width:100%; height:100%;
   overflow:hidden;
-  border-radius:3px 6px 6px 3px;
+  border-radius:2px 8px 8px 2px;
+  box-shadow:
+    -2px 0 8px rgba(0,0,0,0.08),
+    2px 0 30px rgba(100,60,10,0.12),
+    0 4px 40px rgba(100,60,10,0.18);
+  z-index:1;
 }
 
+/* Imagem de fundo (página atual) */
 #baseImg {
   position:absolute; inset:0;
   width:100%; height:100%;
@@ -70,28 +91,30 @@ html, body {
   pointer-events:none;
 }
 
+/* Lombada central */
 #spine {
-  position:absolute; top:0; bottom:0; left:50%;
-  width:3px;
+  position:absolute; top:0; bottom:0;
+  left:calc(50% - 1px); width:2px;
   background: linear-gradient(to right,
-    rgba(100,60,10,0.0) 0%,
-    rgba(100,60,10,0.12) 40%,
-    rgba(100,60,10,0.22) 50%,
-    rgba(100,60,10,0.12) 60%,
-    rgba(100,60,10,0.0) 100%
+    rgba(80,40,0,0) 0%,
+    rgba(80,40,0,0.18) 40%,
+    rgba(80,40,0,0.32) 50%,
+    rgba(80,40,0,0.18) 60%,
+    rgba(80,40,0,0) 100%
   );
-  transform:translateX(-50%);
   z-index:5; pointer-events:none;
 }
 
+/* Canvas do efeito flip */
 #flipCanvas {
   position:absolute; inset:0;
   width:100%; height:100%;
   z-index:20; pointer-events:none;
 }
 
+/* ── ZONAS CLICÁVEIS ── */
 .zone {
-  position:absolute; top:0; bottom:0; width:22%;
+  position:absolute; top:0; bottom:0; width:28%;
   z-index:30; cursor:pointer;
   display:flex; align-items:center;
 }
@@ -99,113 +122,146 @@ html, body {
 #zoneR { right:0; justify-content:flex-end; }
 
 .zone-arrow {
-  width:44px; height:44px; border-radius:50%;
-  background:rgba(255,255,255,0.85);
-  border:1.5px solid rgba(180,120,50,0.25);
+  width:42px; height:42px; border-radius:50%;
+  background:rgba(255,255,255,0.88);
+  border:1px solid rgba(180,120,50,0.2);
   display:flex; align-items:center; justify-content:center;
-  font-size:22px; color:#c07838;
-  opacity:0; transition:opacity 0.25s, transform 0.2s;
+  font-size:24px; color:#c07838;
+  opacity:0; transition:opacity 0.2s, transform 0.2s;
   pointer-events:none;
-  box-shadow: 0 2px 12px rgba(160,100,30,0.15);
+  box-shadow: 0 2px 14px rgba(140,80,20,0.14);
 }
-#zoneL .zone-arrow { margin-left:12px; }
-#zoneR .zone-arrow { margin-right:12px; }
-#zoneL:hover .zone-arrow { opacity:1; transform:translateX(-3px); }
-#zoneR:hover .zone-arrow { opacity:1; transform:translateX(3px); }
+#zoneL .zone-arrow { margin-left:14px; }
+#zoneR .zone-arrow { margin-right:14px; }
+#zoneL:hover .zone-arrow { opacity:1; transform:translateX(-4px); }
+#zoneR:hover .zone-arrow { opacity:1; transform:translateX(4px); }
 .zone.off { pointer-events:none; }
 .zone.off .zone-arrow { display:none; }
 
+/* ── CONTROLES ── */
 #controls {
   position:fixed; bottom:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
-  gap:28px; padding:12px 20px 16px;
+  gap:24px; padding:10px 20px 14px;
 }
 
-#dots { display:flex; gap:8px; align-items:center; }
+#dots { display:flex; gap:7px; align-items:center; }
 .dot {
-  width:8px; height:8px; border-radius:50%;
-  background:rgba(160,100,40,0.2);
-  cursor:pointer; transition:all 0.2s;
-  border:1.5px solid rgba(160,100,40,0.15);
+  width:7px; height:7px; border-radius:50%;
+  background:rgba(160,100,40,0.18);
+  cursor:pointer; transition:all 0.25s;
+  border:1px solid rgba(160,100,40,0.12);
 }
 .dot.on {
-  background:#d4884a;
-  transform:scale(1.35);
+  background:#d4884a; transform:scale(1.4);
   border-color:#d4884a;
 }
 
 #counter {
-  font-size:12px; color:#b07848; letter-spacing:1.5px;
-  opacity:0.75; min-width:52px; text-align:center;
+  font-size:11px; color:#b07848; letter-spacing:1.8px;
+  opacity:0.65; min-width:48px; text-align:center;
 }
 
+/* ── HINT ── */
 #hint {
-  position:fixed; bottom:52px; left:50%; transform:translateX(-50%);
-  background:rgba(255,255,255,0.85);
-  color:#b07040; font-size:12px; letter-spacing:0.5px;
-  padding:6px 16px; border-radius:20px;
-  border:1px solid rgba(180,120,50,0.2);
-  z-index:50; pointer-events:none;
-  white-space:nowrap;
-  box-shadow:0 2px 12px rgba(160,100,30,0.1);
+  position:fixed; bottom:48px; left:50%; transform:translateX(-50%);
+  background:rgba(255,255,255,0.88);
+  color:#b07040; font-size:11px; letter-spacing:0.4px;
+  padding:5px 14px; border-radius:20px;
+  border:1px solid rgba(180,120,50,0.18);
+  z-index:50; pointer-events:none; white-space:nowrap;
+  box-shadow:0 2px 10px rgba(140,80,20,0.1);
   transition:opacity 1.5s;
 }
 #hint.out { opacity:0; }
 
+/* ── LOADER ── */
 #loader {
   position:fixed; inset:0; z-index:999;
   background:#fdf6ee;
   display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:20px;
-  transition:opacity 0.8s;
+  align-items:center; justify-content:center; gap:18px;
+  transition:opacity 0.9s;
 }
 #loader.out { opacity:0; pointer-events:none; }
-.moon { font-size:56px; animation:float 2s ease-in-out infinite; }
+.moon-anim { font-size:52px; animation:float 2s ease-in-out infinite; }
 @keyframes float {
-  0%,100%{transform:translateY(0) rotate(-8deg);}
-  50%{transform:translateY(-10px) rotate(8deg);}
+  0%,100%{ transform:translateY(0) rotate(-8deg); }
+  50%{ transform:translateY(-12px) rotate(8deg); }
 }
 #loader-title {
-  font-size:20px; color:#c07838; letter-spacing:2px;
+  font-size:18px; color:#c07838; letter-spacing:2.5px;
   font-style:italic; opacity:0.85;
 }
 #loader-sub {
-  font-size:12px; color:#c09060; letter-spacing:1.5px; opacity:0.6;
+  font-size:11px; color:#c09060; letter-spacing:2px; opacity:0.55;
 }
 
-@media(max-width:600px){
-  #bookWrap { width:98vw; height: calc(98vw * 9 / 16); }
-  #topbar h1 { font-size:12px; }
-  .zone-arrow { width:36px; height:36px; font-size:18px; }
+/* ── MOBILE: tela cheia ── */
+@media (max-width: 768px) {
+  body { background:#000; }
+
+  #topbar { display:none; }
+
+  #stage { background:#000; }
+
+  #bookWrap {
+    width:100vw;
+    height:56.25vw; /* 16:9 */
+    /* centraliza verticalmente */
+    position:absolute;
+    top:50%; left:0;
+    transform:translateY(-50%);
+  }
+
+  #book {
+    border-radius:0;
+    box-shadow: none;
+  }
+
+  #bookShadow { display:none; }
+
+  #controls { background:rgba(0,0,0,0.55); padding:8px 16px 10px; }
+  .dot { background:rgba(255,255,255,0.25); border-color:rgba(255,255,255,0.1); }
+  .dot.on { background:#f4a835; border-color:#f4a835; }
+  #counter { color:rgba(255,255,255,0.55); }
+
+  #hint {
+    background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.7);
+    border-color:rgba(255,255,255,0.1);
+  }
+
+  #logo { bottom:52px; left:12px; }
+  #logo-moon { font-size:14px; }
+  #logo-text { color:rgba(255,255,255,0.55); font-size:9px; }
+
+  .zone-arrow {
+    background:rgba(255,255,255,0.15);
+    border-color:rgba(255,255,255,0.2);
+    color:#fff;
+  }
 }
 </style>
 </head>
 <body>
 
-<div id="bg"></div>
-
 <div id="loader">
-  <div class="moon">🌙</div>
+  <div class="moon-anim">🌙</div>
   <p id="loader-title">Biblioteca da Lua</p>
   <p id="loader-sub">Abrindo o livro...</p>
 </div>
 
-<div id="topbar">
-  <h1>A Páscoa da Lua</h1>
-</div>
+<div id="topbar"><h1>A Páscoa da Lua</h1></div>
 
 <div id="stage">
   <div id="bookWrap">
+    <div id="bookShadow"></div>
     <div id="book">
       <img id="baseImg" src="" alt="">
       <div id="spine"></div>
       <canvas id="flipCanvas"></canvas>
-      <div class="zone off" id="zoneL">
-        <div class="zone-arrow">&#8249;</div>
-      </div>
-      <div class="zone" id="zoneR">
-        <div class="zone-arrow">&#8250;</div>
-      </div>
+      <div class="zone off" id="zoneL"><div class="zone-arrow">&#8249;</div></div>
+      <div class="zone" id="zoneR"><div class="zone-arrow">&#8250;</div></div>
     </div>
   </div>
 </div>
@@ -213,22 +269,29 @@ html, body {
 <div id="hint">👆 clique nas laterais para virar a página</div>
 
 <div id="controls">
-  <div id="counter">1 / 12</div>
+  <span id="counter">1 / 12</span>
   <div id="dots"></div>
 </div>
 
+<!-- Logo Biblioteca da Lua -->
+<div id="logo">
+  <span id="logo-moon">🌙</span>
+  <span id="logo-text">Biblioteca<br>da Lua</span>
+</div>
+
 <script>
-// ══════════════════════════════════════
-// Imagens na raiz do repositório
-// ══════════════════════════════════════
+// ════════════════════════════
+// CONFIG
+// ════════════════════════════
 const IMAGES = [
   '00.jpg','01.jpg','02.jpg','03.jpg',
   '04.jpg','05.jpg','06.jpg','07.jpg',
   '08.jpg','09.jpg','10.jpg','11.jpg'
 ];
 const TOTAL    = IMAGES.length;
-const DURATION = 700;
+const DURATION = 750; // ms — mais suave
 
+// Pré-carrega todas as imagens
 const imgs = IMAGES.map(src => {
   const i = new Image();
   i.src = src;
@@ -239,6 +302,9 @@ let cur      = 0;
 let flipping = false;
 let hintOn   = true;
 
+// ════════════════════════════
+// ELEMENTOS
+// ════════════════════════════
 const book      = document.getElementById('book');
 const baseImg   = document.getElementById('baseImg');
 const canvas    = document.getElementById('flipCanvas');
@@ -249,13 +315,17 @@ const zoneR     = document.getElementById('zoneR');
 const hintEl    = document.getElementById('hint');
 const counterEl = document.getElementById('counter');
 
+// Dots
 IMAGES.forEach((_,i) => {
   const d = document.createElement('div');
-  d.className = 'dot' + (i===0 ? ' on' : '');
-  d.onclick = () => { if(!flipping && i!==cur) flip(i>cur ? 1 : -1); };
+  d.className = 'dot' + (i===0?' on':'');
+  d.onclick = () => { if(!flipping && i!==cur) flip(i>cur?1:-1); };
   dotsEl.appendChild(d);
 });
 
+// ════════════════════════════
+// UI
+// ════════════════════════════
 function ui() {
   baseImg.src = imgs[cur].src;
   counterEl.textContent = `${cur+1} / ${TOTAL}`;
@@ -264,6 +334,9 @@ function ui() {
   zoneR.classList.toggle('off', cur===TOTAL-1);
 }
 
+// ════════════════════════════
+// RESIZE CANVAS
+// ════════════════════════════
 function resize() {
   canvas.width  = book.offsetWidth;
   canvas.height = book.offsetHeight;
@@ -271,123 +344,185 @@ function resize() {
 new ResizeObserver(resize).observe(book);
 resize();
 
+// ════════════════════════════
+// EFEITO DE PÁGINA — realista
+// Usa curva cúbica de Bezier para
+// simular a curvatura do papel
+// ════════════════════════════
 function flip(dir) {
   if (flipping) return;
   const next = cur + dir;
-  if (next < 0 || next >= TOTAL) return;
+  if (next<0 || next>=TOTAL) return;
   flipping = true;
   hideHint();
 
-  const W = canvas.width, H = canvas.height;
-  const fromImg = imgs[cur];
-  const toImg   = imgs[next];
-  const fwd     = dir > 0;
-  const t0      = performance.now();
+  const W = canvas.width;
+  const H = canvas.height;
+  const from = imgs[cur];
+  const to   = imgs[next];
+  const fwd  = dir > 0;
+  const t0   = performance.now();
 
-  function drawPageShadow(x, w, toLeft) {
-    if (w <= 0) return;
-    const g = ctx.createLinearGradient(
-      toLeft ? x+w : x, 0,
-      toLeft ? x   : x+w, 0
-    );
-    g.addColorStop(0,   'rgba(0,0,0,0.18)');
-    g.addColorStop(0.4, 'rgba(0,0,0,0.06)');
-    g.addColorStop(1,   'rgba(0,0,0,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(x, 0, w, H);
+  function ease(x) {
+    // ease in-out quint — mais suave nas bordas
+    return x < 0.5 ? 16*x**5 : 1 - (-2*x+2)**5/2;
   }
 
-  function drawFoldShine(x, w) {
-    if (w <= 0) return;
-    const g = ctx.createLinearGradient(x, 0, x+w, 0);
-    g.addColorStop(0,   'rgba(255,255,255,0.22)');
-    g.addColorStop(0.5, 'rgba(255,255,255,0.06)');
-    g.addColorStop(1,   'rgba(255,255,255,0)');
-    ctx.fillStyle = g;
-    ctx.fillRect(x, 0, w, H);
+  function drawImg(img, x, y, w, h) {
+    if (img && img.complete && img.naturalWidth>0)
+      ctx.drawImage(img, x, y, w, h);
   }
 
   function frame(now) {
-    const raw = Math.min((now - t0) / DURATION, 1);
-    const t = raw < 0.5 ? 8*raw**4 : 1-(-2*raw+2)**4/2;
+    const raw = Math.min((now-t0)/DURATION, 1);
+    const t   = ease(raw);
 
     ctx.clearRect(0, 0, W, H);
 
     if (fwd) {
+      // ── PÁGINA VIRA PARA FRENTE (direita → esquerda) ──
+
+      // 1. Página de destino embaixo
+      drawImg(to, 0, 0, W, H);
+
+      // 2. Posição da dobra — começa na direita e vai para a esquerda
       const foldX = W * (1 - t);
-      const foldW = W - foldX;
 
-      if (toImg.complete) ctx.drawImage(toImg, 0, 0, W, H);
-
-      if (fromImg.complete && foldX > 0) {
+      // 3. Parte estática da página atual (à esquerda da dobra)
+      if (foldX > 0) {
         ctx.save();
         ctx.beginPath(); ctx.rect(0, 0, foldX, H); ctx.clip();
-        ctx.drawImage(fromImg, 0, 0, W, H);
+        drawImg(from, 0, 0, W, H);
         ctx.restore();
       }
 
-      drawPageShadow(Math.max(foldX - 55, 0), Math.min(55, foldX), true);
+      // 4. Parte que está virando (comprime em perspectiva)
+      const foldW  = W - foldX;
+      if (foldW > 0.5) {
+        // Compressão: cos(ângulo) — dá o efeito de perspectiva 3D
+        const angle   = t * Math.PI;
+        const cosA    = Math.cos(angle);
+        const absCosA = Math.abs(cosA);
 
-      if (foldW > 1) {
-        const compress = Math.abs(Math.cos(t * Math.PI));
         ctx.save();
-        ctx.beginPath(); ctx.rect(foldX, 0, W - foldX, H); ctx.clip();
+        // Clippa só a região da dobra
+        ctx.beginPath(); ctx.rect(foldX, 0, W-foldX, H); ctx.clip();
         ctx.translate(foldX, 0);
 
-        if (t <= 0.5) {
-          ctx.save(); ctx.scale(-compress, 1);
-          if (fromImg.complete) ctx.drawImage(fromImg, W-foldW*2*(1/Math.max(compress,0.01)), 0, W, H, 0, 0, foldW*2, H);
-          ctx.restore();
-          drawFoldShine(0, Math.min(compress*30, 30));
+        // Espessura visual da dobra
+        const visW = foldW * absCosA;
+
+        if (t < 0.5) {
+          // Primeira metade: frente da folha virando (imagem espelhada comprimindo)
+          if (visW > 0.5) {
+            ctx.save();
+            ctx.transform(-absCosA, 0, 0, 1, 0, 0); // espelha + comprime
+            drawImg(from, -(W - foldW*2), 0, W, H);
+            ctx.restore();
+          }
         } else {
-          ctx.save(); ctx.scale(compress, 1);
-          if (toImg.complete) ctx.drawImage(toImg, 0, 0, W, H);
-          ctx.restore();
-          drawFoldShine(0, Math.min(compress*30, 30));
+          // Segunda metade: verso mostrando a próxima página
+          if (visW > 0.5) {
+            ctx.save();
+            ctx.transform(absCosA, 0, 0, 1, 0, 0); // comprime
+            drawImg(to, 0, 0, W, H);
+            ctx.restore();
+          }
         }
 
-        const sg = ctx.createLinearGradient(0, 0, 20, 0);
-        sg.addColorStop(0, 'rgba(0,0,0,0.28)');
+        // Sombra na borda da dobra
+        const sg = ctx.createLinearGradient(0, 0, Math.min(foldW*0.3, 28), 0);
+        sg.addColorStop(0, `rgba(0,0,0,${0.35 * Math.sin(angle)})`);
         sg.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = sg; ctx.fillRect(0, 0, 20, H);
+        ctx.fillStyle = sg;
+        ctx.fillRect(0, 0, Math.min(foldW*0.3+2, 30), H);
+
+        // Brilho na dobra
+        const shine = ctx.createLinearGradient(0, 0, Math.min(visW*0.25, 16), 0);
+        shine.addColorStop(0, `rgba(255,255,255,${0.28 * Math.sin(angle)})`);
+        shine.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = shine;
+        ctx.fillRect(0, 0, Math.min(visW*0.25+1, 18), H);
+
         ctx.restore();
+      }
+
+      // 5. Sombra projetada da folha virando sobre a página embaixo
+      if (foldX > 1) {
+        const shadow = ctx.createLinearGradient(foldX, 0, Math.max(foldX-50, 0), 0);
+        shadow.addColorStop(0, `rgba(0,0,0,${0.20 * Math.sin(t*Math.PI)})`);
+        shadow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = shadow;
+        ctx.fillRect(Math.max(foldX-50, 0), 0, 50, H);
       }
 
     } else {
+      // ── PÁGINA VIRA PARA TRÁS (esquerda → direita) ──
+
+      drawImg(to, 0, 0, W, H);
+
       const foldX = W * t;
 
-      if (toImg.complete) ctx.drawImage(toImg, 0, 0, W, H);
-
-      if (fromImg.complete && W - foldX > 0) {
+      // Parte estática da página atual (à direita)
+      if (W - foldX > 0) {
         ctx.save();
-        ctx.beginPath(); ctx.rect(foldX, 0, W - foldX, H); ctx.clip();
-        ctx.drawImage(fromImg, 0, 0, W, H);
+        ctx.beginPath(); ctx.rect(foldX, 0, W-foldX, H); ctx.clip();
+        drawImg(from, 0, 0, W, H);
         ctx.restore();
       }
 
-      drawPageShadow(foldX, 55, false);
+      // Parte virando
+      if (foldX > 0.5) {
+        const angle   = t * Math.PI;
+        const cosA    = Math.cos(angle);
+        const absCosA = Math.abs(cosA);
 
-      if (foldX > 1) {
-        const compress = Math.abs(Math.cos(t * Math.PI));
         ctx.save();
         ctx.beginPath(); ctx.rect(0, 0, foldX, H); ctx.clip();
         ctx.translate(foldX, 0);
 
-        if (t <= 0.5) {
-          ctx.save(); ctx.scale(-compress, 1);
-          if (fromImg.complete) ctx.drawImage(fromImg, 0, 0, W, H, -W, 0, W, H);
-          ctx.restore();
+        const visW = foldX * absCosA;
+
+        if (t < 0.5) {
+          if (visW > 0.5) {
+            ctx.save();
+            ctx.transform(-absCosA, 0, 0, 1, 0, 0);
+            drawImg(from, 0, 0, W, H, -W, 0, W, H);
+            ctx.restore();
+          }
         } else {
-          ctx.save(); ctx.scale(-compress, 1);
-          if (toImg.complete) ctx.drawImage(toImg, 0, 0, W, H, -W, 0, W, H);
-          ctx.restore();
+          if (visW > 0.5) {
+            ctx.save();
+            ctx.transform(-absCosA, 0, 0, 1, 0, 0);
+            drawImg(to, 0, 0, W, H, -W, 0, W, H);
+            ctx.restore();
+          }
         }
 
-        const sg = ctx.createLinearGradient(-20, 0, 0, 0);
-        sg.addColorStop(0, 'rgba(0,0,0,0)');
-        sg.addColorStop(1, 'rgba(0,0,0,0.25)');
-        ctx.fillStyle = sg; ctx.fillRect(-20, 0, 20, H);
+        // Sombra na dobra
+        const sg = ctx.createLinearGradient(0, 0, -Math.min(foldX*0.3, 28), 0);
+        sg.addColorStop(0, `rgba(0,0,0,${0.32 * Math.sin(angle)})`);
+        sg.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = sg;
+        ctx.fillRect(-Math.min(foldX*0.3+2, 30), 0, Math.min(foldX*0.3+2, 30), H);
+
+        // Brilho
+        const shine = ctx.createLinearGradient(0, 0, -Math.min(visW*0.25, 14), 0);
+        shine.addColorStop(0, `rgba(255,255,255,${0.24 * Math.sin(angle)})`);
+        shine.addColorStop(1, 'rgba(255,255,255,0)');
+        ctx.fillStyle = shine;
+        ctx.fillRect(-Math.min(visW*0.25+1, 16), 0, Math.min(visW*0.25+1, 16), H);
+
         ctx.restore();
+      }
+
+      // Sombra projetada
+      if (foldX < W-1) {
+        const shadow = ctx.createLinearGradient(foldX, 0, Math.min(foldX+50, W), 0);
+        shadow.addColorStop(0, `rgba(0,0,0,${0.18 * Math.sin(t*Math.PI)})`);
+        shadow.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = shadow;
+        ctx.fillRect(foldX, 0, 50, H);
       }
     }
 
@@ -404,6 +539,9 @@ function flip(dir) {
   requestAnimationFrame(frame);
 }
 
+// ════════════════════════════
+// CONTROLES
+// ════════════════════════════
 zoneL.onclick = () => flip(-1);
 zoneR.onclick = () => flip(1);
 
@@ -412,6 +550,7 @@ document.addEventListener('keydown', e => {
   if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   flip(-1);
 });
 
+// Touch swipe
 let tx0=0, ty0=0, tt0=0;
 document.addEventListener('touchstart', e => {
   tx0=e.touches[0].clientX; ty0=e.touches[0].clientY; tt0=Date.now();
@@ -420,27 +559,34 @@ document.addEventListener('touchend', e => {
   if (flipping) return;
   const dx = e.changedTouches[0].clientX - tx0;
   const dy = e.changedTouches[0].clientY - ty0;
-  if (Math.abs(dx)>45 && Math.abs(dx)>Math.abs(dy) && Date.now()-tt0<500) flip(dx<0?1:-1);
+  if (Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy) && Date.now()-tt0<500)
+    flip(dx<0?1:-1);
 }, {passive:true});
 
+// ════════════════════════════
+// HINT
+// ════════════════════════════
 function hideHint() {
   if (hintOn) { hintEl.classList.add('out'); hintOn=false; }
 }
 setTimeout(hideHint, 5000);
 
+// ════════════════════════════
+// LOADER
+// ════════════════════════════
 let loaded = 0;
 function onLoad() {
   loaded++;
   if (loaded >= TOTAL) {
     ui();
-    setTimeout(() => document.getElementById('loader').classList.add('out'), 300);
+    setTimeout(() => document.getElementById('loader').classList.add('out'), 350);
   }
 }
 imgs.forEach(img => {
-  if (img.complete && img.naturalWidth > 0) onLoad();
-  else { img.addEventListener('load', onLoad); img.addEventListener('error', onLoad); }
+  if (img.complete && img.naturalWidth>0) onLoad();
+  else { img.addEventListener('load',onLoad); img.addEventListener('error',onLoad); }
 });
-setTimeout(() => { document.getElementById('loader').classList.add('out'); ui(); }, 6000);
+setTimeout(() => { document.getElementById('loader').classList.add('out'); ui(); }, 7000);
 
 ui();
 </script>
