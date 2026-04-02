@@ -219,13 +219,12 @@ html, body {
 
 <script>
 // ══════════════════════════════════════
-// CONFIG — 12 imagens, 00.jpg a 11.jpg
+// Imagens na raiz do repositório
 // ══════════════════════════════════════
 const IMAGES = [
-  'images/00.jpg','images/01.jpg','images/02.jpg',
-  'images/03.jpg','images/04.jpg','images/05.jpg',
-  'images/06.jpg','images/07.jpg','images/08.jpg',
-  'images/09.jpg','images/10.jpg','images/11.jpg'
+  '00.jpg','01.jpg','02.jpg','03.jpg',
+  '04.jpg','05.jpg','06.jpg','07.jpg',
+  '08.jpg','09.jpg','10.jpg','11.jpg'
 ];
 const TOTAL    = IMAGES.length;
 const DURATION = 700;
@@ -250,7 +249,6 @@ const zoneR     = document.getElementById('zoneR');
 const hintEl    = document.getElementById('hint');
 const counterEl = document.getElementById('counter');
 
-// Dots
 IMAGES.forEach((_,i) => {
   const d = document.createElement('div');
   d.className = 'dot' + (i===0 ? ' on' : '');
