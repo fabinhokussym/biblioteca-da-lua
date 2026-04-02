@@ -33,20 +33,20 @@ html, body {
   color:#a06830; text-transform:uppercase; opacity:0.6;
 }
 
-/* ── STAGE — onde o livro fica ── */
+/* ── STAGE ── */
 #stage {
   position:fixed; inset:0; z-index:10;
   display:flex; align-items:center; justify-content:center;
 }
 
-/* ── WRAPPER DO LIVRO ── */
-#book-container {
+/* ── WRAPPER ── */
+#book-wrapper {
   position:relative;
-  /* O StPageFlip vai controlar o tamanho do canvas interno */
+  display:flex; align-items:center; justify-content:center;
 }
 
-/* Sombra embaixo do livro */
-#book-container::after {
+/* Sombra embaixo */
+#book-wrapper::after {
   content:'';
   position:absolute;
   bottom:-18px; left:4%; right:4%; height:20px;
@@ -54,34 +54,39 @@ html, body {
   pointer-events:none;
 }
 
-/* Canvas gerado pelo StPageFlip */
+/* O StPageFlip injeta o canvas aqui */
+#book-container {
+  position:relative;
+}
+
 #book-container canvas {
   border-radius:3px 8px 8px 3px;
   box-shadow:
     0 2px 8px rgba(0,0,0,0.07),
-    0 8px 40px rgba(100,60,10,0.13);
+    0 8px 40px rgba(100,60,10,0.14),
+    inset -1px 0 3px rgba(0,0,0,0.05);
   display:block;
 }
 
-/* ── BOTÕES DE NAVEGAÇÃO ── */
+/* ── BOTÕES ── */
 .nav-btn {
   position:fixed; top:50%; transform:translateY(-50%);
   width:46px; height:46px; border-radius:50%;
-  background:rgba(255,255,255,0.9);
+  background:rgba(255,255,255,0.92);
   border:1px solid rgba(160,100,40,0.2);
   display:flex; align-items:center; justify-content:center;
-  font-size:24px; color:#b07030;
-  cursor:pointer; z-index:50;
+  font-size:26px; color:#b07030; cursor:pointer; z-index:50;
   box-shadow:0 2px 14px rgba(120,70,10,0.12);
   transition:opacity 0.2s, transform 0.15s, background 0.15s;
+  line-height:1;
 }
-.nav-btn:hover { background:rgba(255,255,255,1); transform:translateY(-50%) scale(1.06); }
-.nav-btn:active { transform:translateY(-50%) scale(0.95); }
+.nav-btn:hover { background:#fff; transform:translateY(-50%) scale(1.07); }
+.nav-btn:active { transform:translateY(-50%) scale(0.94); }
 .nav-btn.hidden { opacity:0; pointer-events:none; }
 #btnPrev { left:14px; }
 #btnNext { right:14px; }
 
-/* ── CONTROLES INFERIORES ── */
+/* ── CONTROLES ── */
 #controls {
   position:fixed; bottom:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
@@ -91,8 +96,7 @@ html, body {
 .dot {
   width:7px; height:7px; border-radius:50%;
   background:rgba(150,90,30,0.18); cursor:pointer;
-  border:1px solid rgba(150,90,30,0.12);
-  transition:all 0.22s;
+  border:1px solid rgba(150,90,30,0.12); transition:all 0.22s;
 }
 .dot.on { background:#d4884a; transform:scale(1.45); border-color:#d4884a; }
 #counter { font-size:11px; color:#a07040; letter-spacing:1.8px; opacity:0.6; min-width:46px; text-align:center; }
@@ -113,8 +117,7 @@ html, body {
   font-size:11px; letter-spacing:0.3px; padding:5px 14px; border-radius:20px;
   border:1px solid rgba(160,100,40,0.15);
   z-index:50; pointer-events:none; white-space:nowrap;
-  box-shadow:0 2px 10px rgba(120,70,10,0.08);
-  transition:opacity 1.5s;
+  box-shadow:0 2px 10px rgba(120,70,10,0.08); transition:opacity 1.5s;
 }
 #hint.out { opacity:0; }
 
@@ -140,26 +143,17 @@ html, body {
   html, body { background:#111; }
   #topbar { display:none; }
   #stage { background:#111; }
-
-  #book-container::after { display:none; }
+  #book-wrapper::after { display:none; }
   #book-container canvas { border-radius:0; box-shadow:none; }
-
   #controls { background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); padding:7px 16px 10px; }
   .dot { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.08); }
   .dot.on { background:#f4a835; border-color:#f4a835; }
   #counter { color:rgba(255,255,255,0.4); }
-
-  .nav-btn {
-    background:rgba(255,255,255,0.12);
-    border-color:rgba(255,255,255,0.15); color:#fff;
-    box-shadow:none;
-  }
+  .nav-btn { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.15); color:#fff; box-shadow:none; }
   .nav-btn:hover { background:rgba(255,255,255,0.2); }
-
   #logo { bottom:46px; }
   #logo-moon { font-size:13px; }
   #logo-text { color:rgba(255,255,255,0.38); }
-
   #hint { background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.6); border-color:rgba(255,255,255,0.08); bottom:48px; }
   #loader { background:#0d0700; }
   #loader-title { color:#e89040; }
@@ -177,31 +171,26 @@ html, body {
 <div id="topbar"><h1>A Páscoa da Lua</h1></div>
 
 <div id="stage">
-  <div id="book-container"></div>
+  <div id="book-wrapper">
+    <div id="book-container"></div>
+  </div>
 </div>
 
 <button class="nav-btn hidden" id="btnPrev">&#8249;</button>
 <button class="nav-btn" id="btnNext">&#8250;</button>
 
 <div id="hint">👆 clique nas laterais para virar a página</div>
-
 <div id="controls">
   <span id="counter">1 / 12</span>
   <div id="dots"></div>
 </div>
-
 <div id="logo">
   <span id="logo-moon">🌙</span>
   <span id="logo-text">Biblioteca<br>da Lua</span>
 </div>
 
-<!-- StPageFlip — biblioteca profissional de flipbook -->
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
-
 <script>
-// ══════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════
 const IMAGES = [
   '00.jpg','01.jpg','02.jpg','03.jpg',
   '04.jpg','05.jpg','06.jpg','07.jpg',
@@ -213,21 +202,17 @@ let pageFlip = null;
 let curPage  = 0;
 let hintOn   = true;
 
-// Elementos
-const stage      = document.getElementById('stage');
-const container  = document.getElementById('book-container');
-const dotsEl     = document.getElementById('dots');
-const counterEl  = document.getElementById('counter');
-const btnPrev    = document.getElementById('btnPrev');
-const btnNext    = document.getElementById('btnNext');
-const hintEl     = document.getElementById('hint');
+const dotsEl    = document.getElementById('dots');
+const counterEl = document.getElementById('counter');
+const btnPrev   = document.getElementById('btnPrev');
+const btnNext   = document.getElementById('btnNext');
+const hintEl    = document.getElementById('hint');
+const container = document.getElementById('book-container');
 
-// ══════════════════════════════════════
-// DOTS
-// ══════════════════════════════════════
+// Dots
 IMAGES.forEach((_,i) => {
   const d = document.createElement('div');
-  d.className = 'dot' + (i===0?' on':'');
+  d.className = 'dot'+(i===0?' on':'');
   d.onclick = () => { if(pageFlip) pageFlip.flip(i); };
   dotsEl.appendChild(d);
 });
@@ -240,9 +225,7 @@ function updateUI(page) {
   btnNext.classList.toggle('hidden', page === TOTAL-1);
 }
 
-// ══════════════════════════════════════
-// CALCULA DIMENSÕES — 16:9, max tela
-// ══════════════════════════════════════
+// ── Calcula tamanho da página 16:9 ──
 function calcSize() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
@@ -253,126 +236,106 @@ function calcSize() {
     w = vw;
     h = Math.round(vw * 9 / 16);
   } else {
-    // Deixa espaço para controles e título
-    const maxW = vw * 0.90;
-    const maxH = vh * 0.86;
+    const maxW = vw * 0.86;
+    const maxH = vh * 0.84;
     w = Math.min(maxW, maxH * 16 / 9);
     h = Math.round(w * 9 / 16);
     if (h > maxH) { h = maxH; w = Math.round(h * 16 / 9); }
   }
-
   return { w: Math.floor(w), h: Math.floor(h) };
 }
 
-// ══════════════════════════════════════
-// INICIA O FLIPBOOK
-// ══════════════════════════════════════
+// ── Inicia o flipbook ──
 function initFlipBook() {
   const { w, h } = calcSize();
+  const isMobile = window.innerWidth <= 768;
 
-  // Remove instância anterior se existir
   if (pageFlip) {
     container.innerHTML = '';
     pageFlip = null;
   }
 
   pageFlip = new St.PageFlip(container, {
-    width:          w,
-    height:         h,
-    size:           'fixed',
-    minWidth:       w,
-    maxWidth:       w,
-    minHeight:      h,
-    maxHeight:      h,
-    drawShadow:     true,
-    flippingTime:   800,
-    usePortrait:    false,   // sempre landscape
-    startZIndex:    0,
-    autoSize:       true,
-    maxShadowOpacity: 0.6,
-    showCover:      false,
+    width:    w,
+    height:   h,
+    size:     'fixed',
+
+    // ★ PÁGINA ÚNICA — chave da correção ★
+    // A biblioteca em modo portrait mostra 1 página por vez
+    usePortrait:  true,
+    startPage:    0,
+
+    drawShadow:          true,
+    flippingTime:        750,
+    startZIndex:         0,
+    autoSize:            true,
+    maxShadowOpacity:    0.5,
+    showCover:           false,
     mobileScrollSupport: false,
-    clickEventForward:   true,
+    clickEventForward:   false,
     useMouseEvents:      true,
     swipeDistance:       30,
     showPageCorners:     true,
     disableFlipByClick:  false,
   });
 
-  // Carrega imagens
   pageFlip.loadFromImages(IMAGES);
 
-  // Evento: página virou
   pageFlip.on('flip', (e) => {
     updateUI(e.data);
     hideHint();
   });
 
-  // Evento: inicializado
-  pageFlip.on('init', (e) => {
+  pageFlip.on('init', () => {
     updateUI(0);
     setTimeout(() => {
       document.getElementById('loader').classList.add('out');
     }, 400);
   });
 
-  // Centraliza o container verticalmente no mobile
-  const isMobile = window.innerWidth <= 768;
+  // Centraliza verticalmente no mobile
   if (isMobile) {
     container.style.position = 'absolute';
-    container.style.top = '50%';
-    container.style.transform = 'translateY(-50%)';
+    container.style.top      = '50%';
+    container.style.left     = '50%';
+    container.style.transform = 'translate(-50%, -50%)';
   } else {
-    container.style.position = '';
-    container.style.top = '';
-    container.style.transform = '';
+    container.style.cssText = '';
   }
 }
 
-// ══════════════════════════════════════
-// BOTÕES
-// ══════════════════════════════════════
-btnPrev.onclick = () => { if(pageFlip) pageFlip.flipPrev(); hideHint(); };
-btnNext.onclick = () => { if(pageFlip) pageFlip.flipNext(); hideHint(); };
+// ── Botões ──
+btnPrev.onclick = () => { if(pageFlip) { pageFlip.flipPrev(); hideHint(); } };
+btnNext.onclick = () => { if(pageFlip) { pageFlip.flipNext(); hideHint(); } };
 
-// Teclado
 document.addEventListener('keydown', e => {
   if (!pageFlip) return;
   if (e.key==='ArrowRight'||e.key==='ArrowDown') { pageFlip.flipNext(); hideHint(); }
   if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   { pageFlip.flipPrev(); hideHint(); }
 });
 
-// ══════════════════════════════════════
-// HINT
-// ══════════════════════════════════════
 function hideHint() {
   if (hintOn) { hintEl.classList.add('out'); hintOn=false; }
 }
 setTimeout(hideHint, 5000);
 
-// ══════════════════════════════════════
-// RESIZE — reinicia o flipbook
-// ══════════════════════════════════════
+// ── Resize ──
 let resizeTimer;
 window.addEventListener('resize', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => {
     const page = curPage;
     initFlipBook();
-    setTimeout(() => { if(pageFlip) pageFlip.flip(page); }, 100);
+    setTimeout(() => { if(pageFlip && page > 0) pageFlip.flip(page); }, 150);
   }, 300);
 });
 
-// ══════════════════════════════════════
-// SERVICE WORKER
-// ══════════════════════════════════════
+// ── Service Worker ──
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
-// ══════════════════════════════════════
-// INICIA
-// ══════════════════════════════════════
+// ── Inicia ──
 initFlipBook();
 </script>
 </body>
