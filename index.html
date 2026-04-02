@@ -22,6 +22,7 @@ html, body {
   background: linear-gradient(160deg, #fdf8f0 0%, #f5e8d8 50%, #fdf4e8 100%);
 }
 
+/* ── TÍTULO TOPO ── */
 #topbar {
   position:fixed; top:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
@@ -32,15 +33,18 @@ html, body {
   color:#a06830; text-transform:uppercase; opacity:0.6;
 }
 
+/* ── STAGE ── */
 #stage {
   position:fixed; inset:0; z-index:10;
   display:flex; align-items:center; justify-content:center;
 }
 
-#book-wrap {
+/* ── WRAPPER ── */
+#book-wrapper {
   position:relative;
+  display:flex; align-items:center; justify-content:center;
 }
-#book-wrap::after {
+#book-wrapper::after {
   content:'';
   position:absolute;
   bottom:-18px; left:4%; right:4%; height:20px;
@@ -48,16 +52,17 @@ html, body {
   pointer-events:none;
 }
 
-#canvas {
-  display:block;
+#book-container { position:relative; }
+
+#book-container canvas {
   border-radius:3px 8px 8px 3px;
   box-shadow:
     0 2px 8px rgba(0,0,0,0.07),
     0 8px 40px rgba(100,60,10,0.14);
-  cursor:pointer;
+  display:block;
 }
 
-/* Botões */
+/* ── BOTÕES ── */
 .nav-btn {
   position:fixed; top:50%; transform:translateY(-50%);
   width:46px; height:46px; border-radius:50%;
@@ -75,7 +80,7 @@ html, body {
 #btnPrev { left:14px; }
 #btnNext { right:14px; }
 
-/* Controles */
+/* ── CONTROLES ── */
 #controls {
   position:fixed; bottom:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
@@ -90,26 +95,26 @@ html, body {
 .dot.on { background:#d4884a; transform:scale(1.45); border-color:#d4884a; }
 #counter { font-size:11px; color:#a07040; letter-spacing:1.8px; opacity:0.6; min-width:46px; text-align:center; }
 
-/* Logo */
+/* ── LOGO ── */
 #logo {
   position:fixed; bottom:15px; left:16px; z-index:100;
   display:flex; align-items:center; gap:5px; opacity:0.48; pointer-events:none;
 }
 #logo-moon { font-size:15px; line-height:1; }
-#logo-text { font-size:9px; letter-spacing:1.5px; color:#a06830; text-transform:uppercase; line-height:1.35; }
+#logo-text { font-size:9px; letter-spacing:1.5px; color:#a06830; text-transform:uppercase; font-family:Georgia,serif; line-height:1.35; }
 
-/* Hint */
+/* ── HINT ── */
 #hint {
   position:fixed; bottom:46px; left:50%; transform:translateX(-50%);
   background:rgba(255,255,255,0.9); color:#a06830;
   font-size:11px; padding:5px 14px; border-radius:20px;
   border:1px solid rgba(160,100,40,0.15);
   z-index:50; pointer-events:none; white-space:nowrap;
-  transition:opacity 1.5s;
+  box-shadow:0 2px 10px rgba(120,70,10,0.08); transition:opacity 1.5s;
 }
 #hint.out { opacity:0; }
 
-/* Loader */
+/* ── LOADER ── */
 #loader {
   position:fixed; inset:0; z-index:999;
   background:#fdf6ee;
@@ -126,18 +131,19 @@ html, body {
 #loader-title { font-size:18px; color:#c07838; letter-spacing:2.5px; font-style:italic; opacity:0.85; }
 #loader-sub { font-size:11px; color:#c09060; letter-spacing:2px; opacity:0.5; }
 
-/* Mobile */
+/* ── MOBILE ── */
 @media (max-width:768px) {
   html,body { background:#111; }
   #topbar { display:none; }
   #stage { background:#111; }
-  #book-wrap::after { display:none; }
-  #canvas { border-radius:0; box-shadow:none; }
+  #book-wrapper::after { display:none; }
+  #book-container canvas { border-radius:0; box-shadow:none; }
   #controls { background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); padding:7px 16px 10px; }
   .dot { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.08); }
   .dot.on { background:#f4a835; border-color:#f4a835; }
   #counter { color:rgba(255,255,255,0.4); }
   .nav-btn { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.15); color:#fff; box-shadow:none; }
+  .nav-btn:hover { background:rgba(255,255,255,0.2); }
   #logo { bottom:46px; }
   #logo-moon { font-size:13px; }
   #logo-text { color:rgba(255,255,255,0.38); }
@@ -158,8 +164,8 @@ html, body {
 <div id="topbar"><h1>A Páscoa da Lua</h1></div>
 
 <div id="stage">
-  <div id="book-wrap">
-    <canvas id="canvas"></canvas>
+  <div id="book-wrapper">
+    <div id="book-container"></div>
   </div>
 </div>
 
@@ -176,346 +182,184 @@ html, body {
   <span id="logo-text">Biblioteca<br>da Lua</span>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <script>
-// ══════════════════════════════
-// CONFIG
-// ══════════════════════════════
-const SRCS = [
-  '00.jpg','01.jpg','02.jpg','03.jpg',
-  '04.jpg','05.jpg','06.jpg','07.jpg',
-  '08.jpg','09.jpg','10.jpg','11.jpg'
+// ══════════════════════════════════════
+// IMAGENS — pasta pascoa-da-lua/
+// Cada imagem original foi cortada em L (esquerda) e R (direita)
+// A StPageFlip exibe duas meias-páginas lado a lado
+// formando uma página completa 16:9
+// ══════════════════════════════════════
+const FOLDER = 'pascoa-da-lua/';
+
+// Todas as meias-páginas em ordem de exibição
+// O livro abre mostrando: [00_L | 00_R], vira para [01_L | 01_R], etc.
+const PAGES = [
+  '00_L.jpg', '00_R.jpg',
+  '01_L.jpg', '01_R.jpg',
+  '02_L.jpg', '02_R.jpg',
+  '03_L.jpg', '03_R.jpg',
+  '04_L.jpg', '04_R.jpg',
+  '05_L.jpg', '05_R.jpg',
+  '06_L.jpg', '06_R.jpg',
+  '07_L.jpg', '07_R.jpg',
+  '08_L.jpg', '08_R.jpg',
+  '09_L.jpg', '09_R.jpg',
+  '10_L.jpg', '10_R.jpg',
+  '11_L.jpg', '11_R.jpg',
 ];
-const TOTAL    = SRCS.length;
-const FLIP_MS  = 700;
 
-// ── Pré-carrega ──
-const bitmaps = new Array(TOTAL).fill(null);
-let  loadedN  = 0;
+// Número de "páginas do livro" (cada página = 1 spread = 2 meias)
+const TOTAL_SPREADS = PAGES.length / 2; // 12
 
-function preload(cb) {
-  SRCS.forEach((src, i) => {
-    const img = new Image();
-    img.onload = img.onerror = () => {
-      // Converte para ImageBitmap para desenho sem artefatos
-      if (img.naturalWidth > 0) {
-        createImageBitmap(img).then(bm => {
-          bitmaps[i] = bm;
-          if (++loadedN >= TOTAL) cb();
-        }).catch(() => { bitmaps[i] = img; if (++loadedN >= TOTAL) cb(); });
-      } else {
-        if (++loadedN >= TOTAL) cb();
-      }
-    };
-    img.src = src;
-  });
-  // Fallback
-  setTimeout(cb, 8000);
-}
+let pageFlip  = null;
+let curSpread = 0;
+let hintOn    = true;
 
-// ── Estado ──
-let cur     = 0;
-let flipping = false;
-let hintOn  = true;
-
-// ── DOM ──
-const canvas    = document.getElementById('canvas');
-const ctx       = canvas.getContext('2d');
+const container = document.getElementById('book-container');
 const dotsEl    = document.getElementById('dots');
 const counterEl = document.getElementById('counter');
 const btnPrev   = document.getElementById('btnPrev');
 const btnNext   = document.getElementById('btnNext');
 const hintEl    = document.getElementById('hint');
-const wrap      = document.getElementById('book-wrap');
 
-// Dots
-SRCS.forEach((_,i) => {
+// Dots — um por spread
+for (let i = 0; i < TOTAL_SPREADS; i++) {
   const d = document.createElement('div');
-  d.className = 'dot'+(i===0?' on':'');
-  d.onclick   = () => { if(!flipping && i!==cur) startFlip(i > cur ? 1 : -1, i); };
+  d.className = 'dot' + (i===0?' on':'');
+  d.onclick = () => { if(pageFlip) pageFlip.flip(i * 2); };
   dotsEl.appendChild(d);
-});
+}
+
+function updateUI(pageIndex) {
+  // pageIndex é o índice da meia-página atual (0..23)
+  // spread = qual "virada" estamos (0..11)
+  curSpread = Math.floor(pageIndex / 2);
+  counterEl.textContent = `${curSpread + 1} / ${TOTAL_SPREADS}`;
+  dotsEl.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i === curSpread));
+  btnPrev.classList.toggle('off', curSpread === 0);
+  btnNext.classList.toggle('off', curSpread === TOTAL_SPREADS - 1);
+}
 
 // ── Dimensões ──
-let W = 0, H = 0;
-
+// Cada meia-página é 8:9 (metade de 16:9)
+// O spread completo (duas meias) é 16:9
 function calcSize() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const mob = vw <= 768;
-  let w, h;
+
+  let spreadW, spreadH;
   if (mob) {
-    w = vw; h = Math.round(vw * 9/16);
+    spreadW = vw;
+    spreadH = Math.round(vw * 9/16);
   } else {
     const mxW = vw * 0.86, mxH = vh * 0.84;
-    w = Math.min(mxW, mxH * 16/9);
-    h = Math.round(w * 9/16);
-    if (h > mxH) { h = mxH; w = Math.round(h * 16/9); }
-  }
-  return { w: Math.floor(w), h: Math.floor(h) };
-}
-
-function applySize() {
-  const { w, h } = calcSize();
-  W = w; H = h;
-  canvas.width  = W;
-  canvas.height = H;
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
-}
-
-// ── Desenha bitmap no canvas ──
-function drawBitmap(bm, x, y, w, h) {
-  if (!bm) return;
-  ctx.drawImage(bm, x, y, w, h);
-}
-
-// ── Render estático ──
-function render() {
-  ctx.clearRect(0, 0, W, H);
-  drawBitmap(bitmaps[cur], 0, 0, W, H);
-}
-
-// ── UI ──
-function updateUI(page) {
-  cur = page;
-  counterEl.textContent = `${page+1} / ${TOTAL}`;
-  dotsEl.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i===page));
-  btnPrev.classList.toggle('off', page === 0);
-  btnNext.classList.toggle('off', page === TOTAL-1);
-}
-
-// ══════════════════════════════
-// FLIP ENGINE — página única
-// Sem espelhamento — apenas
-// compressão + reveal limpo
-// ══════════════════════════════
-function startFlip(dir, targetPage) {
-  if (flipping) return;
-  const next = targetPage !== undefined ? targetPage : cur + dir;
-  if (next < 0 || next >= TOTAL) return;
-
-  flipping = true;
-  hideHint();
-
-  const fwd   = next > cur;
-  const fromI = cur;
-  const toI   = next;
-  const t0    = performance.now();
-
-  // ease in-out quart
-  const ease = x => x < 0.5 ? 8*x**4 : 1-(-2*x+2)**4/2;
-
-  function frame(now) {
-    const raw = Math.min((now - t0) / FLIP_MS, 1);
-    const t   = ease(raw);
-
-    // sin do ângulo — para sombra dinâmica
-    const sinT = Math.sin(t * Math.PI);
-
-    ctx.clearRect(0, 0, W, H);
-
-    if (fwd) {
-      // ── AVANÇAR ──
-      // Fase 1 (t < 0.5): página atual comprime da direita para o centro
-      // Fase 2 (t > 0.5): próxima página expande do centro para a direita
-
-      if (t <= 0.5) {
-        // Página atual ainda visível, comprimindo
-        // A largura visível vai de W até 0 (primeira metade)
-        const visW = Math.round(W * (1 - t * 2)); // W → 0
-
-        if (visW > 0) {
-          // Desenha a fatia esquerda da página atual (sem distorção)
-          ctx.drawImage(bitmaps[fromI],
-            0, 0, visW * (W / visW || 1), H, // src: proporção original
-            0, 0, visW, H                     // dst: comprimida
-          );
-
-          // Sombra na borda direita (dobra)
-          const sg = ctx.createLinearGradient(visW, 0, Math.max(visW - 40, 0), 0);
-          sg.addColorStop(0, `rgba(0,0,0,${0.45 * sinT})`);
-          sg.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = sg;
-          ctx.fillRect(Math.max(visW - 40, 0), 0, 40, H);
-
-          // Brilho na borda (efeito papel)
-          const bg = ctx.createLinearGradient(visW, 0, Math.max(visW - 12, 0), 0);
-          bg.addColorStop(0, `rgba(255,255,255,${0.35 * sinT})`);
-          bg.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx.fillStyle = bg;
-          ctx.fillRect(Math.max(visW - 12, 0), 0, 12, H);
-        }
-
-      } else {
-        // Próxima página expandindo da esquerda
-        const visW = Math.round(W * ((t - 0.5) * 2)); // 0 → W
-
-        if (visW > 0) {
-          // Desenha a próxima página (fatia esquerda expandindo)
-          ctx.drawImage(bitmaps[toI],
-            0, 0, W, H,          // src: imagem completa
-            0, 0, visW, H        // dst: mostra da esquerda até visW
-          );
-
-          // Fundo preto atrás da parte ainda não revelada
-          ctx.fillStyle = '#0a0600';
-          ctx.fillRect(visW, 0, W - visW, H);
-
-          // Sombra na borda esquerda da nova página (vindo do escuro)
-          const sg = ctx.createLinearGradient(0, 0, Math.min(40, visW), 0);
-          sg.addColorStop(0, `rgba(0,0,0,${0.4 * sinT})`);
-          sg.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = sg;
-          ctx.fillRect(0, 0, Math.min(40, visW), H);
-
-          // Brilho na borda
-          const bg = ctx.createLinearGradient(0, 0, Math.min(12, visW), 0);
-          bg.addColorStop(0, `rgba(255,255,255,${0.3 * sinT})`);
-          bg.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx.fillStyle = bg;
-          ctx.fillRect(0, 0, Math.min(12, visW), H);
-        } else {
-          ctx.fillStyle = '#0a0600';
-          ctx.fillRect(0, 0, W, H);
-        }
-      }
-
-    } else {
-      // ── VOLTAR ──
-      // Fase 1 (t < 0.5): página atual comprime da esquerda para o centro
-      // Fase 2 (t > 0.5): página anterior expande do centro para a esquerda
-
-      if (t <= 0.5) {
-        const visW = Math.round(W * (1 - t * 2));
-
-        if (visW > 0) {
-          // Página atual comprimindo — aparece no lado direito
-          ctx.drawImage(bitmaps[fromI],
-            0, 0, W, H,
-            W - visW, 0, visW, H
-          );
-
-          // Sombra na borda esquerda
-          const sg = ctx.createLinearGradient(W - visW, 0, W - visW + 40, 0);
-          sg.addColorStop(0, `rgba(0,0,0,${0.45 * sinT})`);
-          sg.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = sg;
-          ctx.fillRect(W - visW, 0, 40, H);
-
-          const bg = ctx.createLinearGradient(W - visW, 0, W - visW + 12, 0);
-          bg.addColorStop(0, `rgba(255,255,255,${0.35 * sinT})`);
-          bg.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx.fillStyle = bg;
-          ctx.fillRect(W - visW, 0, 12, H);
-
-          // Fundo escuro à esquerda
-          ctx.fillStyle = '#0a0600';
-          ctx.fillRect(0, 0, W - visW, H);
-
-        } else {
-          ctx.fillStyle = '#0a0600';
-          ctx.fillRect(0, 0, W, H);
-        }
-
-      } else {
-        const visW = Math.round(W * ((t - 0.5) * 2));
-
-        if (visW > 0) {
-          // Página anterior expandindo da direita
-          ctx.drawImage(bitmaps[toI],
-            W - visW, 0, visW, H,   // src: fatia direita
-            W - visW, 0, visW, H    // dst: mesma posição
-          );
-
-          // Fundo escuro à esquerda do que ainda não apareceu
-          ctx.fillStyle = '#0a0600';
-          ctx.fillRect(0, 0, W - visW, H);
-
-          // Sombra na borda
-          const sg = ctx.createLinearGradient(W, 0, W - Math.min(40, visW), 0);
-          sg.addColorStop(0, `rgba(0,0,0,${0.4 * sinT})`);
-          sg.addColorStop(1, 'rgba(0,0,0,0)');
-          ctx.fillStyle = sg;
-          ctx.fillRect(W - Math.min(40, visW), 0, Math.min(40, visW), H);
-
-          const bg = ctx.createLinearGradient(W, 0, W - Math.min(12, visW), 0);
-          bg.addColorStop(0, `rgba(255,255,255,${0.3 * sinT})`);
-          bg.addColorStop(1, 'rgba(255,255,255,0)');
-          ctx.fillStyle = bg;
-          ctx.fillRect(W - Math.min(12, visW), 0, Math.min(12, visW), H);
-        } else {
-          ctx.fillStyle = '#0a0600';
-          ctx.fillRect(0, 0, W, H);
-        }
-      }
-    }
-
-    if (raw < 1) {
-      requestAnimationFrame(frame);
-    } else {
-      cur = next;
-      updateUI(cur);
-      render();
-      flipping = false;
-    }
+    spreadW = Math.min(mxW, mxH * 16/9);
+    spreadH = Math.round(spreadW * 9/16);
+    if (spreadH > mxH) { spreadH = mxH; spreadW = Math.round(spreadH * 16/9); }
   }
 
-  requestAnimationFrame(frame);
+  // Cada meia-página tem metade da largura do spread
+  const pageW = Math.floor(spreadW / 2);
+  const pageH = Math.floor(spreadH);
+
+  return { pageW, pageH, spreadW: pageW * 2, spreadH: pageH };
 }
 
-// ── Controles ──
-btnPrev.onclick = () => startFlip(-1);
-btnNext.onclick = () => startFlip(1);
+// ── Inicia o flipbook ──
+function initFlipBook() {
+  const { pageW, pageH } = calcSize();
+  const mob = window.innerWidth <= 768;
 
-canvas.addEventListener('click', e => {
-  const x = e.offsetX / W;
-  if (x > 0.6) startFlip(1);
-  else if (x < 0.4) startFlip(-1);
-});
+  if (pageFlip) {
+    container.innerHTML = '';
+    pageFlip = null;
+  }
+
+  pageFlip = new St.PageFlip(container, {
+    width:    pageW,   // largura de UMA meia-página
+    height:   pageH,   // altura da página
+
+    size:     'fixed',
+    minWidth: pageW,
+    maxWidth: pageW,
+    minHeight: pageH,
+    maxHeight: pageH,
+
+    drawShadow:          true,
+    flippingTime:        750,
+    usePortrait:         false,  // landscape = duas páginas lado a lado
+    startZIndex:         0,
+    autoSize:            true,
+    maxShadowOpacity:    0.6,
+    showCover:           false,
+    mobileScrollSupport: false,
+    clickEventForward:   false,
+    useMouseEvents:      true,
+    swipeDistance:       30,
+    showPageCorners:     true,
+    disableFlipByClick:  false,
+  });
+
+  // Carrega todas as meias-páginas
+  pageFlip.loadFromImages(PAGES.map(p => FOLDER + p));
+
+  pageFlip.on('flip', (e) => {
+    updateUI(e.data);
+    hideHint();
+  });
+
+  pageFlip.on('init', () => {
+    updateUI(0);
+    setTimeout(() => document.getElementById('loader').classList.add('out'), 400);
+  });
+
+  // Mobile: centraliza verticalmente
+  if (mob) {
+    container.style.position  = 'absolute';
+    container.style.top       = '50%';
+    container.style.left      = '50%';
+    container.style.transform = 'translate(-50%, -50%)';
+  } else {
+    container.style.cssText = '';
+  }
+}
+
+// ── Botões ──
+btnPrev.onclick = () => { if(pageFlip) { pageFlip.flipPrev(); hideHint(); } };
+btnNext.onclick = () => { if(pageFlip) { pageFlip.flipNext(); hideHint(); } };
 
 document.addEventListener('keydown', e => {
-  if (e.key==='ArrowRight'||e.key==='ArrowDown') startFlip(1);
-  if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   startFlip(-1);
+  if (!pageFlip) return;
+  if (e.key==='ArrowRight'||e.key==='ArrowDown') { pageFlip.flipNext(); hideHint(); }
+  if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   { pageFlip.flipPrev(); hideHint(); }
 });
 
-// Touch swipe
-let tx0=0, ty0=0, tt0=0;
-document.addEventListener('touchstart', e => {
-  tx0=e.touches[0].clientX; ty0=e.touches[0].clientY; tt0=Date.now();
-}, {passive:true});
-document.addEventListener('touchend', e => {
-  if (flipping) return;
-  const dx = e.changedTouches[0].clientX - tx0;
-  const dy = e.changedTouches[0].clientY - ty0;
-  if (Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy) && Date.now()-tt0<500)
-    startFlip(dx < 0 ? 1 : -1);
-}, {passive:true});
-
+// ── Hint ──
 function hideHint() {
   if (hintOn) { hintEl.classList.add('out'); hintOn=false; }
 }
 setTimeout(hideHint, 5000);
 
-// Resize
+// ── Resize ──
 let rsTimer;
 window.addEventListener('resize', () => {
   clearTimeout(rsTimer);
-  rsTimer = setTimeout(() => { applySize(); render(); }, 200);
+  rsTimer = setTimeout(() => {
+    const s = curSpread;
+    initFlipBook();
+    setTimeout(() => { if(pageFlip && s > 0) pageFlip.flip(s * 2); }, 150);
+  }, 300);
 });
 
-// Service Worker
+// ── Service Worker ──
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
 // ── Inicia ──
-applySize();
-
-preload(() => {
-  render();
-  updateUI(0);
-  setTimeout(() => document.getElementById('loader').classList.add('out'), 350);
-});
+initFlipBook();
 </script>
 </body>
 </html>
