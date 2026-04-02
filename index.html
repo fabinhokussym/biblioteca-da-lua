@@ -20,69 +20,52 @@ html, body {
   font-family: Georgia, serif;
   user-select:none; -webkit-user-select:none;
   touch-action:none;
+  background: #f5ece0;
 }
 
-/* Fundo sempre visível */
-body { background: linear-gradient(160deg, #fdf8f0 0%, #f5e8d8 50%, #fdf4e8 100%); }
-
-/* Topbar — só desktop */
 #topbar {
   position:fixed; top:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
-  padding:12px 0 0; pointer-events:none;
+  padding:11px 0 0; pointer-events:none;
 }
 #topbar h1 {
-  font-size:12px; font-weight:normal; letter-spacing:2.5px;
-  color:#a06830; text-transform:uppercase; opacity:0.6;
+  font-size:11px; font-weight:normal; letter-spacing:2.5px;
+  color:#a06830; text-transform:uppercase; opacity:0.55;
 }
 
-/* Stage — ocupa tudo e centraliza o livro */
 #stage {
-  position:fixed;
-  top:0; left:0; right:0; bottom:0;
+  position:fixed; inset:0; z-index:10;
   display:flex; align-items:center; justify-content:center;
-  z-index:10;
 }
 
-/* Wrapper — tamanho definido via JS */
 #book-wrapper {
-  position:relative;
-  flex-shrink:0;
+  position:relative; flex-shrink:0;
 }
 #book-wrapper::after {
   content:'';
   position:absolute;
-  bottom:-14px; left:5%; right:5%; height:16px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(90,50,10,0.14) 0%, transparent 70%);
+  bottom:-12px; left:5%; right:5%; height:14px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(90,50,10,0.13) 0%, transparent 70%);
   pointer-events:none;
 }
 
-/* Container do StPageFlip */
 #book-container {
-  position:relative;
-  overflow:hidden;
+  position:relative; overflow:hidden;
   border-radius:2px 6px 6px 2px;
-  box-shadow:
-    0 2px 6px rgba(0,0,0,0.06),
-    0 8px 36px rgba(100,60,10,0.14);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07), 0 8px 36px rgba(100,60,10,0.15);
 }
 
-/* Páginas HTML */
-.page {
-  overflow:hidden;
-  background:#f8f0e0;
-}
+.page { overflow:hidden; background:#f8f0e0; }
 .page img {
   width:100%; height:100%;
-  object-fit:cover; display:block;
-  pointer-events:none;
+  object-fit:cover; display:block; pointer-events:none;
 }
 
-/* Botões laterais */
+/* Botões */
 .nav-btn {
   position:fixed; top:50%; transform:translateY(-50%);
-  width:44px; height:44px; border-radius:50%;
-  background:rgba(255,255,255,0.92);
+  width:42px; height:42px; border-radius:50%;
+  background:rgba(255,255,255,0.9);
   border:1px solid rgba(160,100,40,0.2);
   display:flex; align-items:center; justify-content:center;
   font-size:24px; color:#b07030; cursor:pointer; z-index:60;
@@ -93,45 +76,38 @@ body { background: linear-gradient(160deg, #fdf8f0 0%, #f5e8d8 50%, #fdf4e8 100%
 .nav-btn:hover { transform:translateY(-50%) scale(1.08); }
 .nav-btn:active { transform:translateY(-50%) scale(0.93); }
 .nav-btn.off { opacity:0 !important; pointer-events:none; }
-#btnPrev { left:12px; }
-#btnNext { right:12px; }
+#btnPrev { left:10px; }
+#btnNext { right:10px; }
 
-/* Controles inferiores */
+/* Controles */
 #controls {
   position:fixed; bottom:0; left:0; right:0; z-index:60;
   display:flex; align-items:center; justify-content:center;
-  gap:18px; padding:9px 20px 13px;
+  gap:16px; padding:8px 20px 12px;
 }
-#dots { display:flex; gap:6px; align-items:center; }
+#dots { display:flex; gap:6px; align-items:center; flex-wrap:wrap; justify-content:center; }
 .dot {
-  width:7px; height:7px; border-radius:50%;
+  width:6px; height:6px; border-radius:50%;
   background:rgba(150,90,30,0.2); cursor:pointer;
   border:1px solid rgba(150,90,30,0.12); transition:all 0.2s;
 }
 .dot.on { background:#d4884a; transform:scale(1.4); border-color:#d4884a; }
-#counter {
-  font-size:11px; color:#a07040; letter-spacing:1.8px;
-  opacity:0.6; min-width:44px; text-align:center;
-}
+#counter { font-size:10px; color:#a07040; letter-spacing:1.5px; opacity:0.6; min-width:42px; text-align:center; }
 
 /* Logo */
 #logo {
-  position:fixed; bottom:14px; left:14px; z-index:60;
-  display:flex; align-items:center; gap:5px;
-  opacity:0.45; pointer-events:none;
+  position:fixed; bottom:12px; left:12px; z-index:60;
+  display:flex; align-items:center; gap:4px; opacity:0.42; pointer-events:none;
 }
-#logo-moon { font-size:14px; line-height:1; }
-#logo-text {
-  font-size:9px; letter-spacing:1.4px; color:#a06830;
-  text-transform:uppercase; line-height:1.35;
-}
+#logo-moon { font-size:13px; line-height:1; }
+#logo-text { font-size:8px; letter-spacing:1.3px; color:#a06830; text-transform:uppercase; line-height:1.3; }
 
 /* Hint */
 #hint {
-  position:fixed; bottom:44px; left:50%; transform:translateX(-50%);
+  position:fixed; bottom:42px; left:50%; transform:translateX(-50%);
   background:rgba(255,255,255,0.92); color:#a06830;
-  font-size:11px; padding:5px 13px; border-radius:20px;
-  border:1px solid rgba(160,100,40,0.15);
+  font-size:10px; padding:4px 12px; border-radius:20px;
+  border:1px solid rgba(160,100,40,0.14);
   z-index:60; pointer-events:none; white-space:nowrap;
   transition:opacity 1.5s;
 }
@@ -142,17 +118,17 @@ body { background: linear-gradient(160deg, #fdf8f0 0%, #f5e8d8 50%, #fdf4e8 100%
   position:fixed; inset:0; z-index:999;
   background:#fdf6ee;
   display:flex; flex-direction:column;
-  align-items:center; justify-content:center; gap:18px;
+  align-items:center; justify-content:center; gap:16px;
   transition:opacity 0.9s;
 }
 #loader.out { opacity:0; pointer-events:none; }
-.moon-anim { font-size:52px; animation:float 2s ease-in-out infinite; }
+.moon-anim { font-size:50px; animation:float 2s ease-in-out infinite; }
 @keyframes float {
   0%,100%{ transform:translateY(0) rotate(-8deg); }
-  50%{ transform:translateY(-11px) rotate(8deg); }
+  50%{ transform:translateY(-10px) rotate(8deg); }
 }
-#loader-title { font-size:18px; color:#c07838; letter-spacing:2.5px; font-style:italic; opacity:0.85; }
-#loader-sub { font-size:11px; color:#c09060; letter-spacing:2px; opacity:0.5; }
+#loader-title { font-size:17px; color:#c07838; letter-spacing:2.5px; font-style:italic; opacity:0.85; }
+#loader-sub { font-size:10px; color:#c09060; letter-spacing:2px; opacity:0.5; }
 </style>
 </head>
 <body>
@@ -167,32 +143,7 @@ body { background: linear-gradient(160deg, #fdf8f0 0%, #f5e8d8 50%, #fdf4e8 100%
 
 <div id="stage">
   <div id="book-wrapper">
-    <div id="book-container">
-      <div class="page"><img src="pascoa-da-lua/00_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/00_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/01_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/01_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/02_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/02_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/03_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/03_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/04_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/04_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/05_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/05_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/06_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/06_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/07_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/07_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/08_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/08_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/09_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/09_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/10_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/10_R.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/11_L.jpg" alt=""></div>
-      <div class="page"><img src="pascoa-da-lua/11_R.jpg" alt=""></div>
-    </div>
+    <div id="book-container"></div>
   </div>
 </div>
 
@@ -209,14 +160,29 @@ body { background: linear-gradient(160deg, #fdf8f0 0%, #f5e8d8 50%, #fdf4e8 100%
   <span id="logo-text">Biblioteca<br>da Lua</span>
 </div>
 
-<!-- Cache bust: v4 -->
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <script>
-const TOTAL_SPREADS = 12;
-let pageFlip  = null;
+// v5
+const SRCS = [
+  'pascoa-da-lua/00_L.jpg','pascoa-da-lua/00_R.jpg',
+  'pascoa-da-lua/01_L.jpg','pascoa-da-lua/01_R.jpg',
+  'pascoa-da-lua/02_L.jpg','pascoa-da-lua/02_R.jpg',
+  'pascoa-da-lua/03_L.jpg','pascoa-da-lua/03_R.jpg',
+  'pascoa-da-lua/04_L.jpg','pascoa-da-lua/04_R.jpg',
+  'pascoa-da-lua/05_L.jpg','pascoa-da-lua/05_R.jpg',
+  'pascoa-da-lua/06_L.jpg','pascoa-da-lua/06_R.jpg',
+  'pascoa-da-lua/07_L.jpg','pascoa-da-lua/07_R.jpg',
+  'pascoa-da-lua/08_L.jpg','pascoa-da-lua/08_R.jpg',
+  'pascoa-da-lua/09_L.jpg','pascoa-da-lua/09_R.jpg',
+  'pascoa-da-lua/10_L.jpg','pascoa-da-lua/10_R.jpg',
+  'pascoa-da-lua/11_L.jpg','pascoa-da-lua/11_R.jpg',
+];
+const TOTAL = 12; // spreads
+
+let pf        = null;
 let curSpread = 0;
 let hintOn    = true;
-let initialized = false;
+let didInit   = false;
 
 const wrapper   = document.getElementById('book-wrapper');
 const container = document.getElementById('book-container');
@@ -225,125 +191,63 @@ const counterEl = document.getElementById('counter');
 const btnPrev   = document.getElementById('btnPrev');
 const btnNext   = document.getElementById('btnNext');
 const hintEl    = document.getElementById('hint');
-const topbar    = document.getElementById('topbar');
-const stage     = document.getElementById('stage');
 
 // Dots
-for (let i = 0; i < TOTAL_SPREADS; i++) {
+for (let i=0; i<TOTAL; i++) {
   const d = document.createElement('div');
-  d.className = 'dot' + (i===0?' on':'');
-  d.onclick = () => { if(pageFlip) pageFlip.flip(i * 2); };
+  d.className = 'dot'+(i===0?' on':'');
+  d.onclick = () => { if(pf) pf.flip(i*2); };
   dotsEl.appendChild(d);
 }
 
-function updateUI(pageIndex) {
-  curSpread = Math.floor(pageIndex / 2);
-  counterEl.textContent = `${curSpread + 1} / ${TOTAL_SPREADS}`;
-  dotsEl.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i===curSpread));
+function updateUI(idx) {
+  curSpread = Math.floor(idx/2);
+  counterEl.textContent = `${curSpread+1} / ${TOTAL}`;
+  dotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===curSpread));
   btnPrev.classList.toggle('off', curSpread===0);
-  btnNext.classList.toggle('off', curSpread===TOTAL_SPREADS-1);
+  btnNext.classList.toggle('off', curSpread===TOTAL-1);
 }
 
-// ── Calcula dimensões ──
-// O spread completo (L+R) = proporção 16:9 das imagens originais
-// Cada page = metade do spread
+// ══════════════════════════════════════
+// CÁLCULO DE TAMANHO
+// Usa screen.width/height quando disponível
+// para evitar bugs de orientação no iOS
+// ══════════════════════════════════════
 function calcSize() {
-  // Usa innerWidth/innerHeight que já considera orientation
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  // Usa visualViewport se disponível (mais preciso em mobile)
+  const vp = window.visualViewport;
+  const vw = vp ? vp.width  : window.innerWidth;
+  const vh = vp ? vp.height : window.innerHeight;
 
-  // Espaço disponível: deixa margem para controles
-  const controlsH = 42; // altura dos controles inferiores
-  const topH = 32;      // altura do topbar
-
+  // Espaço disponível descontando controles
+  const usedV = 52; // controles inferiores + topbar
   const availW = vw;
-  const availH = vh - controlsH - topH;
+  const availH = Math.max(vh - usedV, 100);
 
-  // O spread tem proporção 16:9 (imagem original completa)
-  let spreadW = availW;
-  let spreadH = Math.round(spreadW * 9 / 16);
+  // Proporção 16:9 para o spread completo (L+R)
+  let sw = availW;
+  let sh = Math.round(sw * 9/16);
+  if (sh > availH) { sh = availH; sw = Math.round(sh * 16/9); }
 
-  if (spreadH > availH) {
-    spreadH = availH;
-    spreadW = Math.round(spreadH * 16 / 9);
-  }
+  // Garante não ultrapassar
+  sw = Math.min(sw, availW);
+  sh = Math.min(sh, availH);
 
-  // Garante que não ultrapassa
-  spreadW = Math.min(spreadW, availW);
-  spreadH = Math.min(spreadH, availH);
-
-  const pageW = Math.floor(spreadW / 2);
-  const pageH = Math.floor(spreadH);
-
-  return { pageW, pageH, spreadW: pageW * 2, spreadH: pageH };
+  const pw = Math.floor(sw/2);
+  const ph = Math.floor(sh);
+  return { pw, ph, sw: pw*2, sh: ph };
 }
 
-function applyMobileStyle() {
-  const isMob = window.innerWidth <= 768 || window.innerHeight <= 500;
-  if (isMob) {
-    document.body.style.background = '#111';
-    stage.style.background = '#111';
-    topbar.style.display = 'none';
-    document.getElementById('controls').style.background = 'rgba(0,0,0,0.55)';
-    document.querySelectorAll('.dot').forEach(d => {
-      d.style.background = d.classList.contains('on') ? '#f4a835' : 'rgba(255,255,255,0.2)';
-      d.style.borderColor = d.classList.contains('on') ? '#f4a835' : 'rgba(255,255,255,0.08)';
-    });
-    counterEl.style.color = 'rgba(255,255,255,0.4)';
-    btnPrev.style.background = 'rgba(255,255,255,0.12)';
-    btnNext.style.background = 'rgba(255,255,255,0.12)';
-    btnPrev.style.color = '#fff';
-    btnNext.style.color = '#fff';
-    btnPrev.style.borderColor = 'rgba(255,255,255,0.15)';
-    btnNext.style.borderColor = 'rgba(255,255,255,0.15)';
-    document.getElementById('logo').style.color = 'rgba(255,255,255,0.38)';
-    document.getElementById('logo-text').style.color = 'rgba(255,255,255,0.38)';
-    hintEl.style.background = 'rgba(0,0,0,0.55)';
-    hintEl.style.color = 'rgba(255,255,255,0.6)';
-    hintEl.style.borderColor = 'rgba(255,255,255,0.08)';
-    container.style.borderRadius = '0';
-    container.style.boxShadow = 'none';
-    wrapper.style.setProperty('--after-display', 'none');
-    wrapper.querySelector && (wrapper.style.cssText += ';--hide-after:1');
-  } else {
-    document.body.style.background = '';
-    stage.style.background = '';
-    topbar.style.display = '';
-    document.getElementById('controls').style.background = '';
-    counterEl.style.color = '';
-    btnPrev.style.cssText = '';
-    btnNext.style.cssText = '';
-    document.getElementById('logo-text').style.color = '';
-    hintEl.style.cssText = '';
-    container.style.borderRadius = '2px 6px 6px 2px';
-    container.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06),0 8px 36px rgba(100,60,10,0.14)';
-  }
-}
-
+// ══════════════════════════════════════
+// REBUILD — destroi e recria tudo
+// ══════════════════════════════════════
 function rebuild() {
-  // Remove instância anterior
-  if (pageFlip) {
-    try { pageFlip.destroy(); } catch(e){}
-    pageFlip = null;
-  }
+  // Destrói instância anterior
+  if (pf) { try { pf.destroy(); } catch(e){} pf=null; }
 
-  // Recria divs das páginas (a biblioteca modifica o DOM)
+  // Recria páginas
   container.innerHTML = '';
-  const srcs = [
-    'pascoa-da-lua/00_L.jpg','pascoa-da-lua/00_R.jpg',
-    'pascoa-da-lua/01_L.jpg','pascoa-da-lua/01_R.jpg',
-    'pascoa-da-lua/02_L.jpg','pascoa-da-lua/02_R.jpg',
-    'pascoa-da-lua/03_L.jpg','pascoa-da-lua/03_R.jpg',
-    'pascoa-da-lua/04_L.jpg','pascoa-da-lua/04_R.jpg',
-    'pascoa-da-lua/05_L.jpg','pascoa-da-lua/05_R.jpg',
-    'pascoa-da-lua/06_L.jpg','pascoa-da-lua/06_R.jpg',
-    'pascoa-da-lua/07_L.jpg','pascoa-da-lua/07_R.jpg',
-    'pascoa-da-lua/08_L.jpg','pascoa-da-lua/08_R.jpg',
-    'pascoa-da-lua/09_L.jpg','pascoa-da-lua/09_R.jpg',
-    'pascoa-da-lua/10_L.jpg','pascoa-da-lua/10_R.jpg',
-    'pascoa-da-lua/11_L.jpg','pascoa-da-lua/11_R.jpg',
-  ];
-  srcs.forEach(src => {
+  SRCS.forEach(src => {
     const div = document.createElement('div');
     div.className = 'page';
     const img = document.createElement('img');
@@ -352,102 +256,101 @@ function rebuild() {
     container.appendChild(div);
   });
 
-  const { pageW, pageH, spreadW, spreadH } = calcSize();
+  const {pw, ph, sw, sh} = calcSize();
 
-  // ★ Define tamanho explícito no wrapper e container
-  wrapper.style.width  = spreadW + 'px';
-  wrapper.style.height = spreadH + 'px';
-  container.style.width  = spreadW + 'px';
-  container.style.height = spreadH + 'px';
+  // Aplica tamanhos explícitos
+  wrapper.style.width    = sw+'px';
+  wrapper.style.height   = sh+'px';
+  container.style.width  = sw+'px';
+  container.style.height = sh+'px';
 
-  // Define tamanho em cada .page
   document.querySelectorAll('.page').forEach(p => {
-    p.style.width  = pageW + 'px';
-    p.style.height = pageH + 'px';
+    p.style.width  = pw+'px';
+    p.style.height = ph+'px';
   });
 
-  applyMobileStyle();
-
-  pageFlip = new St.PageFlip(container, {
-    width:    pageW,
-    height:   pageH,
-    size:    'fixed',
-    minWidth: pageW,
-    maxWidth: pageW,
-    minHeight: pageH,
-    maxHeight: pageH,
+  pf = new St.PageFlip(container, {
+    width:    pw,
+    height:   ph,
+    size:     'fixed',
+    minWidth:  pw, maxWidth:  pw,
+    minHeight: ph, maxHeight: ph,
     drawShadow:          true,
-    flippingTime:        750,
+    flippingTime:        700,
     usePortrait:         false,
     startZIndex:         0,
     autoSize:            false,
-    maxShadowOpacity:    0.6,
+    maxShadowOpacity:    0.55,
     showCover:           false,
     mobileScrollSupport: false,
     clickEventForward:   false,
     useMouseEvents:      true,
-    swipeDistance:       30,
+    swipeDistance:       25,
     showPageCorners:     true,
     disableFlipByClick:  false,
   });
 
-  pageFlip.loadFromHTML(document.querySelectorAll('.page'));
+  pf.loadFromHTML(document.querySelectorAll('.page'));
 
-  pageFlip.on('flip', (e) => {
-    updateUI(e.data);
-    hideHint();
-  });
+  pf.on('flip', e => { updateUI(e.data); hideHint(); });
 
-  pageFlip.on('init', () => {
-    if (!initialized) {
-      initialized = true;
-      setTimeout(() => document.getElementById('loader').classList.add('out'), 400);
+  pf.on('init', () => {
+    if (!didInit) {
+      didInit = true;
+      setTimeout(()=>document.getElementById('loader').classList.add('out'), 350);
     }
-    updateUI(curSpread * 2 > 0 ? curSpread * 2 : 0);
+    // Restaura página após rebuild
+    if (curSpread > 0) {
+      setTimeout(()=>{ if(pf) pf.flip(curSpread*2); }, 150);
+    } else {
+      updateUI(0);
+    }
   });
 }
 
 // Botões
-btnPrev.onclick = () => { if(pageFlip) { pageFlip.flipPrev(); hideHint(); } };
-btnNext.onclick = () => { if(pageFlip) { pageFlip.flipNext(); hideHint(); } };
+btnPrev.onclick = ()=>{ if(pf){pf.flipPrev();hideHint();} };
+btnNext.onclick = ()=>{ if(pf){pf.flipNext();hideHint();} };
 
-document.addEventListener('keydown', e => {
-  if (!pageFlip) return;
-  if (e.key==='ArrowRight'||e.key==='ArrowDown') { pageFlip.flipNext(); hideHint(); }
-  if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   { pageFlip.flipPrev(); hideHint(); }
+document.addEventListener('keydown', e=>{
+  if(!pf) return;
+  if(e.key==='ArrowRight'||e.key==='ArrowDown'){pf.flipNext();hideHint();}
+  if(e.key==='ArrowLeft' ||e.key==='ArrowUp')  {pf.flipPrev();hideHint();}
 });
 
-function hideHint() {
-  if (hintOn) { hintEl.classList.add('out'); hintOn=false; }
-}
+function hideHint(){ if(hintOn){hintEl.classList.add('out');hintOn=false;} }
 setTimeout(hideHint, 5000);
 
-// ★ Resize e orientação — reconstrói o livro
-let rsTimer;
-function onResize() {
+// ══════════════════════════════════════
+// RESIZE / ORIENTAÇÃO
+// Debounce 300ms para não rebuildar
+// durante a animação de orientação
+// ══════════════════════════════════════
+let rsTimer=null;
+
+function scheduleRebuild() {
   clearTimeout(rsTimer);
-  rsTimer = setTimeout(() => {
-    const s = curSpread;
-    rebuild();
-    // Volta para a página correta após rebuild
-    setTimeout(() => {
-      if (pageFlip && s > 0) pageFlip.flip(s * 2);
-    }, 200);
-  }, 250);
+  rsTimer = setTimeout(rebuild, 300);
 }
 
-window.addEventListener('resize', onResize);
-// ★ Escuta mudança de orientação explicitamente
-window.addEventListener('orientationchange', () => {
-  // Espera a orientação completar antes de recalcular
-  setTimeout(onResize, 400);
+window.addEventListener('resize', scheduleRebuild);
+
+// orientationchange dispara ANTES do resize no iOS
+// Esperamos 500ms para o browser terminar de reorientar
+window.addEventListener('orientationchange', ()=>{
+  clearTimeout(rsTimer);
+  rsTimer = setTimeout(rebuild, 500);
 });
+
+// visualViewport resize (mais confiável em mobile)
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', scheduleRebuild);
+}
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
-// Inicia
 rebuild();
 </script>
 </body>
