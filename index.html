@@ -12,112 +12,127 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>A Páscoa da Lua — Biblioteca da Lua</title>
 <style>
-* { margin:0; padding:0; box-sizing:border-box; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 html, body {
-  width:100%; height:100%; overflow:hidden;
+  width:100%; height:100%;
+  overflow:hidden;
   font-family: Georgia, serif;
   user-select:none; -webkit-user-select:none;
   touch-action:none;
-  background: linear-gradient(160deg, #fdf8f0 0%, #f5e8d8 50%, #fdf4e8 100%);
 }
 
+/* Fundo sempre visível */
+body { background: linear-gradient(160deg, #fdf8f0 0%, #f5e8d8 50%, #fdf4e8 100%); }
+
+/* Topbar — só desktop */
 #topbar {
   position:fixed; top:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
-  padding:13px 0 0; pointer-events:none;
+  padding:12px 0 0; pointer-events:none;
 }
 #topbar h1 {
   font-size:12px; font-weight:normal; letter-spacing:2.5px;
   color:#a06830; text-transform:uppercase; opacity:0.6;
 }
 
-/* Stage centraliza tudo */
+/* Stage — ocupa tudo e centraliza o livro */
 #stage {
-  position:fixed; inset:0; z-index:10;
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
   display:flex; align-items:center; justify-content:center;
+  z-index:10;
 }
 
-/* Wrapper com tamanho exato do livro */
+/* Wrapper — tamanho definido via JS */
 #book-wrapper {
   position:relative;
-  box-shadow: 0 8px 40px rgba(100,60,10,0.18), 0 2px 8px rgba(0,0,0,0.08);
-  border-radius: 3px 8px 8px 3px;
+  flex-shrink:0;
 }
 #book-wrapper::after {
   content:'';
   position:absolute;
-  bottom:-16px; left:4%; right:4%; height:18px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(90,50,10,0.15) 0%, transparent 70%);
+  bottom:-14px; left:5%; right:5%; height:16px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(90,50,10,0.14) 0%, transparent 70%);
   pointer-events:none;
 }
 
-/* Container do flipbook — tamanho definido via JS */
+/* Container do StPageFlip */
 #book-container {
   position:relative;
   overflow:hidden;
-  border-radius: 3px 8px 8px 3px;
+  border-radius:2px 6px 6px 2px;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.06),
+    0 8px 36px rgba(100,60,10,0.14);
 }
 
-/* Cada página HTML */
+/* Páginas HTML */
 .page {
   overflow:hidden;
-  background:#fff;
+  background:#f8f0e0;
 }
 .page img {
   width:100%; height:100%;
   object-fit:cover; display:block;
-  pointer-events:none; draggable:false;
+  pointer-events:none;
 }
 
 /* Botões laterais */
 .nav-btn {
   position:fixed; top:50%; transform:translateY(-50%);
-  width:46px; height:46px; border-radius:50%;
+  width:44px; height:44px; border-radius:50%;
   background:rgba(255,255,255,0.92);
   border:1px solid rgba(160,100,40,0.2);
   display:flex; align-items:center; justify-content:center;
-  font-size:26px; color:#b07030; cursor:pointer; z-index:50;
-  box-shadow:0 2px 14px rgba(120,70,10,0.12);
+  font-size:24px; color:#b07030; cursor:pointer; z-index:60;
+  box-shadow:0 2px 12px rgba(120,70,10,0.12);
   transition:opacity 0.2s, transform 0.15s;
   line-height:1;
 }
-.nav-btn:hover { transform:translateY(-50%) scale(1.07); }
-.nav-btn:active { transform:translateY(-50%) scale(0.94); }
-.nav-btn.off { opacity:0; pointer-events:none; }
-#btnPrev { left:14px; }
-#btnNext { right:14px; }
+.nav-btn:hover { transform:translateY(-50%) scale(1.08); }
+.nav-btn:active { transform:translateY(-50%) scale(0.93); }
+.nav-btn.off { opacity:0 !important; pointer-events:none; }
+#btnPrev { left:12px; }
+#btnNext { right:12px; }
 
-/* Controles */
+/* Controles inferiores */
 #controls {
-  position:fixed; bottom:0; left:0; right:0; z-index:50;
+  position:fixed; bottom:0; left:0; right:0; z-index:60;
   display:flex; align-items:center; justify-content:center;
-  gap:20px; padding:10px 20px 14px;
+  gap:18px; padding:9px 20px 13px;
 }
-#dots { display:flex; gap:7px; align-items:center; }
+#dots { display:flex; gap:6px; align-items:center; }
 .dot {
   width:7px; height:7px; border-radius:50%;
-  background:rgba(150,90,30,0.18); cursor:pointer;
-  border:1px solid rgba(150,90,30,0.12); transition:all 0.22s;
+  background:rgba(150,90,30,0.2); cursor:pointer;
+  border:1px solid rgba(150,90,30,0.12); transition:all 0.2s;
 }
-.dot.on { background:#d4884a; transform:scale(1.45); border-color:#d4884a; }
-#counter { font-size:11px; color:#a07040; letter-spacing:1.8px; opacity:0.6; min-width:46px; text-align:center; }
+.dot.on { background:#d4884a; transform:scale(1.4); border-color:#d4884a; }
+#counter {
+  font-size:11px; color:#a07040; letter-spacing:1.8px;
+  opacity:0.6; min-width:44px; text-align:center;
+}
 
 /* Logo */
 #logo {
-  position:fixed; bottom:15px; left:16px; z-index:100;
-  display:flex; align-items:center; gap:5px; opacity:0.48; pointer-events:none;
+  position:fixed; bottom:14px; left:14px; z-index:60;
+  display:flex; align-items:center; gap:5px;
+  opacity:0.45; pointer-events:none;
 }
-#logo-moon { font-size:15px; line-height:1; }
-#logo-text { font-size:9px; letter-spacing:1.5px; color:#a06830; text-transform:uppercase; line-height:1.35; }
+#logo-moon { font-size:14px; line-height:1; }
+#logo-text {
+  font-size:9px; letter-spacing:1.4px; color:#a06830;
+  text-transform:uppercase; line-height:1.35;
+}
 
 /* Hint */
 #hint {
-  position:fixed; bottom:46px; left:50%; transform:translateX(-50%);
-  background:rgba(255,255,255,0.9); color:#a06830;
-  font-size:11px; padding:5px 14px; border-radius:20px;
+  position:fixed; bottom:44px; left:50%; transform:translateX(-50%);
+  background:rgba(255,255,255,0.92); color:#a06830;
+  font-size:11px; padding:5px 13px; border-radius:20px;
   border:1px solid rgba(160,100,40,0.15);
-  z-index:50; pointer-events:none; white-space:nowrap;
+  z-index:60; pointer-events:none; white-space:nowrap;
   transition:opacity 1.5s;
 }
 #hint.out { opacity:0; }
@@ -131,34 +146,13 @@ html, body {
   transition:opacity 0.9s;
 }
 #loader.out { opacity:0; pointer-events:none; }
-.moon-anim { font-size:54px; animation:float 2s ease-in-out infinite; }
+.moon-anim { font-size:52px; animation:float 2s ease-in-out infinite; }
 @keyframes float {
   0%,100%{ transform:translateY(0) rotate(-8deg); }
-  50%{ transform:translateY(-12px) rotate(8deg); }
+  50%{ transform:translateY(-11px) rotate(8deg); }
 }
 #loader-title { font-size:18px; color:#c07838; letter-spacing:2.5px; font-style:italic; opacity:0.85; }
 #loader-sub { font-size:11px; color:#c09060; letter-spacing:2px; opacity:0.5; }
-
-/* Mobile */
-@media (max-width:768px) {
-  html,body { background:#111; }
-  #topbar { display:none; }
-  #stage { background:#111; }
-  #book-wrapper { box-shadow:none; border-radius:0; }
-  #book-wrapper::after { display:none; }
-  #book-container { border-radius:0; }
-  #controls { background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); padding:7px 16px 10px; }
-  .dot { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.08); }
-  .dot.on { background:#f4a835; border-color:#f4a835; }
-  #counter { color:rgba(255,255,255,0.4); }
-  .nav-btn { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.15); color:#fff; box-shadow:none; }
-  #logo { bottom:46px; }
-  #logo-moon { font-size:13px; }
-  #logo-text { color:rgba(255,255,255,0.38); }
-  #hint { background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.6); border-color:rgba(255,255,255,0.08); bottom:48px; }
-  #loader { background:#0d0700; }
-  #loader-title { color:#e89040; }
-}
 </style>
 </head>
 <body>
@@ -215,12 +209,14 @@ html, body {
   <span id="logo-text">Biblioteca<br>da Lua</span>
 </div>
 
+<!-- Cache bust: v4 -->
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <script>
 const TOTAL_SPREADS = 12;
 let pageFlip  = null;
 let curSpread = 0;
 let hintOn    = true;
+let initialized = false;
 
 const wrapper   = document.getElementById('book-wrapper');
 const container = document.getElementById('book-container');
@@ -229,6 +225,8 @@ const counterEl = document.getElementById('counter');
 const btnPrev   = document.getElementById('btnPrev');
 const btnNext   = document.getElementById('btnNext');
 const hintEl    = document.getElementById('hint');
+const topbar    = document.getElementById('topbar');
+const stage     = document.getElementById('stage');
 
 // Dots
 for (let i = 0; i < TOTAL_SPREADS; i++) {
@@ -241,95 +239,139 @@ for (let i = 0; i < TOTAL_SPREADS; i++) {
 function updateUI(pageIndex) {
   curSpread = Math.floor(pageIndex / 2);
   counterEl.textContent = `${curSpread + 1} / ${TOTAL_SPREADS}`;
-  dotsEl.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i === curSpread));
-  btnPrev.classList.toggle('off', curSpread === 0);
-  btnNext.classList.toggle('off', curSpread === TOTAL_SPREADS - 1);
+  dotsEl.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i===curSpread));
+  btnPrev.classList.toggle('off', curSpread===0);
+  btnNext.classList.toggle('off', curSpread===TOTAL_SPREADS-1);
 }
 
-// ── Calcula tamanho ──
-// O spread total é 16:9
-// Cada page = metade do spread = 8:9
+// ── Calcula dimensões ──
+// O spread completo (L+R) = proporção 16:9 das imagens originais
+// Cada page = metade do spread
 function calcSize() {
+  // Usa innerWidth/innerHeight que já considera orientation
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const mob = vw <= 768;
 
-  let spreadW, spreadH;
+  // Espaço disponível: deixa margem para controles
+  const controlsH = 42; // altura dos controles inferiores
+  const topH = 32;      // altura do topbar
 
-  if (mob) {
-    // Mobile: ocupa tela cheia
-    spreadW = vw;
-    spreadH = Math.round(vw * 9 / 16);
-  } else {
-    // Desktop: cabe na tela com margens para controles
-    const availW = vw * 0.84;
-    const availH = vh * 0.82; // deixa espaço para topbar e controls
-    // Tenta maximizar pela largura
-    spreadW = availW;
-    spreadH = Math.round(spreadW * 9 / 16);
-    // Se não cabe na altura, limita pela altura
-    if (spreadH > availH) {
-      spreadH = availH;
-      spreadW = Math.round(spreadH * 16 / 9);
-    }
+  const availW = vw;
+  const availH = vh - controlsH - topH;
+
+  // O spread tem proporção 16:9 (imagem original completa)
+  let spreadW = availW;
+  let spreadH = Math.round(spreadW * 9 / 16);
+
+  if (spreadH > availH) {
+    spreadH = availH;
+    spreadW = Math.round(spreadH * 16 / 9);
   }
+
+  // Garante que não ultrapassa
+  spreadW = Math.min(spreadW, availW);
+  spreadH = Math.min(spreadH, availH);
 
   const pageW = Math.floor(spreadW / 2);
   const pageH = Math.floor(spreadH);
+
   return { pageW, pageH, spreadW: pageW * 2, spreadH: pageH };
 }
 
-function initFlipBook() {
-  const { pageW, pageH, spreadW, spreadH } = calcSize();
-  const mob = window.innerWidth <= 768;
-
-  // Destroi instância anterior
-  if (pageFlip) {
-    try { pageFlip.destroy(); } catch(e) {}
-    pageFlip = null;
-    container.innerHTML = '';
-    // Recria as páginas
-    const srcs = [
-      'pascoa-da-lua/00_L.jpg','pascoa-da-lua/00_R.jpg',
-      'pascoa-da-lua/01_L.jpg','pascoa-da-lua/01_R.jpg',
-      'pascoa-da-lua/02_L.jpg','pascoa-da-lua/02_R.jpg',
-      'pascoa-da-lua/03_L.jpg','pascoa-da-lua/03_R.jpg',
-      'pascoa-da-lua/04_L.jpg','pascoa-da-lua/04_R.jpg',
-      'pascoa-da-lua/05_L.jpg','pascoa-da-lua/05_R.jpg',
-      'pascoa-da-lua/06_L.jpg','pascoa-da-lua/06_R.jpg',
-      'pascoa-da-lua/07_L.jpg','pascoa-da-lua/07_R.jpg',
-      'pascoa-da-lua/08_L.jpg','pascoa-da-lua/08_R.jpg',
-      'pascoa-da-lua/09_L.jpg','pascoa-da-lua/09_R.jpg',
-      'pascoa-da-lua/10_L.jpg','pascoa-da-lua/10_R.jpg',
-      'pascoa-da-lua/11_L.jpg','pascoa-da-lua/11_R.jpg',
-    ];
-    srcs.forEach(src => {
-      const div = document.createElement('div');
-      div.className = 'page';
-      const img = document.createElement('img');
-      img.src = src; img.alt = '';
-      div.appendChild(img);
-      container.appendChild(div);
+function applyMobileStyle() {
+  const isMob = window.innerWidth <= 768 || window.innerHeight <= 500;
+  if (isMob) {
+    document.body.style.background = '#111';
+    stage.style.background = '#111';
+    topbar.style.display = 'none';
+    document.getElementById('controls').style.background = 'rgba(0,0,0,0.55)';
+    document.querySelectorAll('.dot').forEach(d => {
+      d.style.background = d.classList.contains('on') ? '#f4a835' : 'rgba(255,255,255,0.2)';
+      d.style.borderColor = d.classList.contains('on') ? '#f4a835' : 'rgba(255,255,255,0.08)';
     });
+    counterEl.style.color = 'rgba(255,255,255,0.4)';
+    btnPrev.style.background = 'rgba(255,255,255,0.12)';
+    btnNext.style.background = 'rgba(255,255,255,0.12)';
+    btnPrev.style.color = '#fff';
+    btnNext.style.color = '#fff';
+    btnPrev.style.borderColor = 'rgba(255,255,255,0.15)';
+    btnNext.style.borderColor = 'rgba(255,255,255,0.15)';
+    document.getElementById('logo').style.color = 'rgba(255,255,255,0.38)';
+    document.getElementById('logo-text').style.color = 'rgba(255,255,255,0.38)';
+    hintEl.style.background = 'rgba(0,0,0,0.55)';
+    hintEl.style.color = 'rgba(255,255,255,0.6)';
+    hintEl.style.borderColor = 'rgba(255,255,255,0.08)';
+    container.style.borderRadius = '0';
+    container.style.boxShadow = 'none';
+    wrapper.style.setProperty('--after-display', 'none');
+    wrapper.querySelector && (wrapper.style.cssText += ';--hide-after:1');
+  } else {
+    document.body.style.background = '';
+    stage.style.background = '';
+    topbar.style.display = '';
+    document.getElementById('controls').style.background = '';
+    counterEl.style.color = '';
+    btnPrev.style.cssText = '';
+    btnNext.style.cssText = '';
+    document.getElementById('logo-text').style.color = '';
+    hintEl.style.cssText = '';
+    container.style.borderRadius = '2px 6px 6px 2px';
+    container.style.boxShadow = '0 2px 6px rgba(0,0,0,0.06),0 8px 36px rgba(100,60,10,0.14)';
+  }
+}
+
+function rebuild() {
+  // Remove instância anterior
+  if (pageFlip) {
+    try { pageFlip.destroy(); } catch(e){}
+    pageFlip = null;
   }
 
-  // ★ Define tamanho EXPLÍCITO no container e no wrapper
-  // Isso evita que o autoSize quebre o layout
+  // Recria divs das páginas (a biblioteca modifica o DOM)
+  container.innerHTML = '';
+  const srcs = [
+    'pascoa-da-lua/00_L.jpg','pascoa-da-lua/00_R.jpg',
+    'pascoa-da-lua/01_L.jpg','pascoa-da-lua/01_R.jpg',
+    'pascoa-da-lua/02_L.jpg','pascoa-da-lua/02_R.jpg',
+    'pascoa-da-lua/03_L.jpg','pascoa-da-lua/03_R.jpg',
+    'pascoa-da-lua/04_L.jpg','pascoa-da-lua/04_R.jpg',
+    'pascoa-da-lua/05_L.jpg','pascoa-da-lua/05_R.jpg',
+    'pascoa-da-lua/06_L.jpg','pascoa-da-lua/06_R.jpg',
+    'pascoa-da-lua/07_L.jpg','pascoa-da-lua/07_R.jpg',
+    'pascoa-da-lua/08_L.jpg','pascoa-da-lua/08_R.jpg',
+    'pascoa-da-lua/09_L.jpg','pascoa-da-lua/09_R.jpg',
+    'pascoa-da-lua/10_L.jpg','pascoa-da-lua/10_R.jpg',
+    'pascoa-da-lua/11_L.jpg','pascoa-da-lua/11_R.jpg',
+  ];
+  srcs.forEach(src => {
+    const div = document.createElement('div');
+    div.className = 'page';
+    const img = document.createElement('img');
+    img.src = src; img.alt = '';
+    div.appendChild(img);
+    container.appendChild(div);
+  });
+
+  const { pageW, pageH, spreadW, spreadH } = calcSize();
+
+  // ★ Define tamanho explícito no wrapper e container
+  wrapper.style.width  = spreadW + 'px';
+  wrapper.style.height = spreadH + 'px';
   container.style.width  = spreadW + 'px';
   container.style.height = spreadH + 'px';
-  wrapper.style.width    = spreadW + 'px';
-  wrapper.style.height   = spreadH + 'px';
 
-  // Define tamanho em cada .page antes de iniciar
+  // Define tamanho em cada .page
   document.querySelectorAll('.page').forEach(p => {
     p.style.width  = pageW + 'px';
     p.style.height = pageH + 'px';
   });
 
+  applyMobileStyle();
+
   pageFlip = new St.PageFlip(container, {
     width:    pageW,
     height:   pageH,
-    size:     'fixed',
+    size:    'fixed',
     minWidth: pageW,
     maxWidth: pageW,
     minHeight: pageH,
@@ -338,7 +380,7 @@ function initFlipBook() {
     flippingTime:        750,
     usePortrait:         false,
     startZIndex:         0,
-    autoSize:            false, // ★ desligado — gerenciamos o tamanho manualmente
+    autoSize:            false,
     maxShadowOpacity:    0.6,
     showCover:           false,
     mobileScrollSupport: false,
@@ -357,8 +399,11 @@ function initFlipBook() {
   });
 
   pageFlip.on('init', () => {
-    updateUI(0);
-    setTimeout(() => document.getElementById('loader').classList.add('out'), 400);
+    if (!initialized) {
+      initialized = true;
+      setTimeout(() => document.getElementById('loader').classList.add('out'), 400);
+    }
+    updateUI(curSpread * 2 > 0 ? curSpread * 2 : 0);
   });
 }
 
@@ -377,22 +422,33 @@ function hideHint() {
 }
 setTimeout(hideHint, 5000);
 
-// Resize
+// ★ Resize e orientação — reconstrói o livro
 let rsTimer;
-window.addEventListener('resize', () => {
+function onResize() {
   clearTimeout(rsTimer);
   rsTimer = setTimeout(() => {
     const s = curSpread;
-    initFlipBook();
-    setTimeout(() => { if(pageFlip && s > 0) pageFlip.flip(s * 2); }, 200);
-  }, 300);
+    rebuild();
+    // Volta para a página correta após rebuild
+    setTimeout(() => {
+      if (pageFlip && s > 0) pageFlip.flip(s * 2);
+    }, 200);
+  }, 250);
+}
+
+window.addEventListener('resize', onResize);
+// ★ Escuta mudança de orientação explicitamente
+window.addEventListener('orientationchange', () => {
+  // Espera a orientação completar antes de recalcular
+  setTimeout(onResize, 400);
 });
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
-initFlipBook();
+// Inicia
+rebuild();
 </script>
 </body>
 </html>
