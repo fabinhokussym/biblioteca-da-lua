@@ -1,0 +1,26 @@
+{
+  "name": "Biblioteca da Lua",
+  "short_name": "Biblioteca da Lua",
+  "description": "A Páscoa da Lua — Turma da Lua",
+  "start_url": "/biblioteca-da-lua/",
+  "scope": "/biblioteca-da-lua/",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#fdf6ee",
+  "theme_color": "#fdf6ee",
+  "lang": "pt-BR",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

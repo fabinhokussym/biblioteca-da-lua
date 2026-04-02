@@ -4,50 +4,33 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="blank">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Biblioteca da Lua">
 <meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#fdf6ee">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>A Páscoa da Lua — Biblioteca da Lua</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
 html, body {
-  width:100%; height:100%;
-  overflow:hidden;
+  width:100%; height:100%; overflow:hidden;
   font-family: Georgia, serif;
   user-select:none; -webkit-user-select:none;
   touch-action:none;
+  background: linear-gradient(160deg, #fdf8f0 0%, #f7ece0 50%, #fdf4e8 100%);
 }
 
-/* ── FUNDO ── */
-body {
-  background: linear-gradient(135deg, #fdf6ee 0%, #f5ede0 50%, #fdf0e0 100%);
-}
-
-/* ── LOGO canto inferior esquerdo ── */
-#logo {
-  position:fixed; bottom:18px; left:18px; z-index:100;
-  display:flex; align-items:center; gap:6px;
-  opacity:0.7; pointer-events:none;
-  transition: opacity 0.3s;
-}
-#logo:hover { opacity:1; }
-#logo-moon { font-size:18px; }
-#logo-text {
-  font-size:10px; letter-spacing:1.8px; color:#b07040;
-  text-transform:uppercase; font-family:Georgia,serif;
-  line-height:1.2;
-}
-
-/* ── TÍTULO TOPO — só desktop ── */
+/* ── TÍTULO ── */
 #topbar {
   position:fixed; top:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
-  padding:14px 20px 10px;
-  pointer-events:none;
+  padding:13px 20px 0; pointer-events:none;
 }
 #topbar h1 {
-  font-size:13px; font-weight:normal; letter-spacing:2.5px;
-  color:#b07040; text-transform:uppercase; opacity:0.7;
+  font-size:12px; font-weight:normal; letter-spacing:2.5px;
+  color:#a06830; text-transform:uppercase; opacity:0.6;
 }
 
 /* ── STAGE ── */
@@ -59,63 +42,65 @@ body {
 /* ── LIVRO ── */
 #bookWrap {
   position:relative;
-  width: min(88vw, 152vh);
-  height: min(49.5vw, 85.5vh);
+  width: min(90vw, 155vh);
+  height: min(50.6vw, 87.2vh);
 }
 
-/* Sombra do livro */
-#bookShadow {
-  position:absolute;
-  bottom:-22px; left:4%; right:4%; height:24px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(100,60,10,0.22) 0%, transparent 72%);
-  pointer-events:none; z-index:0;
+/* Sombra sob o livro */
+#bookWrap::after {
+  content:'';
+  position:absolute; bottom:-20px; left:6%; right:6%; height:22px;
+  background: radial-gradient(ellipse at 50% 0%, rgba(90,50,10,0.18) 0%, transparent 70%);
+  pointer-events:none;
 }
 
 #book {
-  position:relative;
-  width:100%; height:100%;
+  position:relative; width:100%; height:100%;
   overflow:hidden;
-  border-radius:2px 8px 8px 2px;
+  border-radius:3px 8px 8px 3px;
   box-shadow:
-    -2px 0 8px rgba(0,0,0,0.08),
-    2px 0 30px rgba(100,60,10,0.12),
-    0 4px 40px rgba(100,60,10,0.18);
-  z-index:1;
+    0 2px 8px rgba(0,0,0,0.08),
+    0 8px 40px rgba(100,60,10,0.14),
+    inset -1px 0 3px rgba(0,0,0,0.06);
 }
 
-/* Imagem de fundo (página atual) */
-#baseImg {
+/* Todas as páginas empilhadas */
+#pages {
   position:absolute; inset:0;
+}
+
+.page-layer {
+  position:absolute; inset:0;
+  width:100%; height:100%;
+}
+
+.page-layer img {
   width:100%; height:100%;
   object-fit:cover; display:block;
   pointer-events:none;
 }
 
-/* Lombada central */
-#spine {
-  position:absolute; top:0; bottom:0;
-  left:calc(50% - 1px); width:2px;
-  background: linear-gradient(to right,
-    rgba(80,40,0,0) 0%,
-    rgba(80,40,0,0.18) 40%,
-    rgba(80,40,0,0.32) 50%,
-    rgba(80,40,0,0.18) 60%,
-    rgba(80,40,0,0) 100%
-  );
-  z-index:5; pointer-events:none;
-}
-
-/* Canvas do efeito flip */
+/* Canvas de flip — fica em cima de tudo */
 #flipCanvas {
   position:absolute; inset:0;
   width:100%; height:100%;
-  z-index:20; pointer-events:none;
+  z-index:30; pointer-events:none;
+}
+
+/* Lombada */
+#spine {
+  position:absolute; top:0; bottom:0; left:50%; transform:translateX(-50%);
+  width:3px; z-index:20; pointer-events:none;
+  background: linear-gradient(to right,
+    rgba(60,30,0,0) 0%, rgba(60,30,0,0.18) 35%,
+    rgba(60,30,0,0.32) 50%, rgba(60,30,0,0.18) 65%,
+    rgba(60,30,0,0) 100%);
 }
 
 /* ── ZONAS CLICÁVEIS ── */
 .zone {
   position:absolute; top:0; bottom:0; width:28%;
-  z-index:30; cursor:pointer;
+  z-index:40; cursor:pointer;
   display:flex; align-items:center;
 }
 #zoneL { left:0; justify-content:flex-start; }
@@ -123,18 +108,18 @@ body {
 
 .zone-arrow {
   width:42px; height:42px; border-radius:50%;
-  background:rgba(255,255,255,0.88);
-  border:1px solid rgba(180,120,50,0.2);
+  background:rgba(255,255,255,0.9);
+  border:1px solid rgba(160,100,40,0.2);
   display:flex; align-items:center; justify-content:center;
-  font-size:24px; color:#c07838;
-  opacity:0; transition:opacity 0.2s, transform 0.2s;
+  font-size:22px; color:#b07030;
+  opacity:0; transition:opacity 0.2s, transform 0.18s;
   pointer-events:none;
-  box-shadow: 0 2px 14px rgba(140,80,20,0.14);
+  box-shadow:0 2px 12px rgba(120,70,10,0.12);
 }
 #zoneL .zone-arrow { margin-left:14px; }
 #zoneR .zone-arrow { margin-right:14px; }
-#zoneL:hover .zone-arrow { opacity:1; transform:translateX(-4px); }
-#zoneR:hover .zone-arrow { opacity:1; transform:translateX(4px); }
+#zoneL:hover .zone-arrow { opacity:1; transform:translateX(-3px); }
+#zoneR:hover .zone-arrow { opacity:1; transform:translateX(3px); }
 .zone.off { pointer-events:none; }
 .zone.off .zone-arrow { display:none; }
 
@@ -142,35 +127,35 @@ body {
 #controls {
   position:fixed; bottom:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
-  gap:24px; padding:10px 20px 14px;
+  gap:20px; padding:10px 20px 14px;
 }
-
 #dots { display:flex; gap:7px; align-items:center; }
 .dot {
   width:7px; height:7px; border-radius:50%;
-  background:rgba(160,100,40,0.18);
-  cursor:pointer; transition:all 0.25s;
-  border:1px solid rgba(160,100,40,0.12);
+  background:rgba(150,90,30,0.18); cursor:pointer;
+  border:1px solid rgba(150,90,30,0.12);
+  transition:all 0.2s;
 }
-.dot.on {
-  background:#d4884a; transform:scale(1.4);
-  border-color:#d4884a;
-}
+.dot.on { background:#d4884a; transform:scale(1.45); border-color:#d4884a; }
+#counter { font-size:11px; color:#a07040; letter-spacing:1.8px; opacity:0.6; min-width:46px; text-align:center; }
 
-#counter {
-  font-size:11px; color:#b07848; letter-spacing:1.8px;
-  opacity:0.65; min-width:48px; text-align:center;
+/* ── LOGO ── */
+#logo {
+  position:fixed; bottom:15px; left:15px; z-index:100;
+  display:flex; align-items:center; gap:5px;
+  opacity:0.5; pointer-events:none;
 }
+#logo-moon { font-size:15px; line-height:1; }
+#logo-text { font-size:9px; letter-spacing:1.5px; color:#a06830; text-transform:uppercase; font-family:Georgia,serif; line-height:1.35; }
 
 /* ── HINT ── */
 #hint {
-  position:fixed; bottom:48px; left:50%; transform:translateX(-50%);
-  background:rgba(255,255,255,0.88);
-  color:#b07040; font-size:11px; letter-spacing:0.4px;
-  padding:5px 14px; border-radius:20px;
-  border:1px solid rgba(180,120,50,0.18);
+  position:fixed; bottom:46px; left:50%; transform:translateX(-50%);
+  background:rgba(255,255,255,0.9); color:#a06830;
+  font-size:11px; letter-spacing:0.3px; padding:5px 14px; border-radius:20px;
+  border:1px solid rgba(160,100,40,0.15);
   z-index:50; pointer-events:none; white-space:nowrap;
-  box-shadow:0 2px 10px rgba(140,80,20,0.1);
+  box-shadow:0 2px 10px rgba(120,70,10,0.08);
   transition:opacity 1.5s;
 }
 #hint.out { opacity:0; }
@@ -184,62 +169,36 @@ body {
   transition:opacity 0.9s;
 }
 #loader.out { opacity:0; pointer-events:none; }
-.moon-anim { font-size:52px; animation:float 2s ease-in-out infinite; }
+.moon-anim { font-size:54px; animation:float 2s ease-in-out infinite; }
 @keyframes float {
   0%,100%{ transform:translateY(0) rotate(-8deg); }
   50%{ transform:translateY(-12px) rotate(8deg); }
 }
-#loader-title {
-  font-size:18px; color:#c07838; letter-spacing:2.5px;
-  font-style:italic; opacity:0.85;
-}
-#loader-sub {
-  font-size:11px; color:#c09060; letter-spacing:2px; opacity:0.55;
-}
+#loader-title { font-size:18px; color:#c07838; letter-spacing:2.5px; font-style:italic; opacity:0.85; }
+#loader-sub { font-size:11px; color:#c09060; letter-spacing:2px; opacity:0.5; }
 
-/* ── MOBILE: tela cheia ── */
+/* ── MOBILE ── */
 @media (max-width: 768px) {
-  body { background:#000; }
-
+  html, body { background:#111; }
   #topbar { display:none; }
-
-  #stage { background:#000; }
-
+  #stage { background:#111; }
   #bookWrap {
-    width:100vw;
-    height:56.25vw; /* 16:9 */
-    /* centraliza verticalmente */
-    position:absolute;
-    top:50%; left:0;
-    transform:translateY(-50%);
+    width:100vw; height:56.25vw;
+    position:absolute; top:50%; transform:translateY(-50%);
   }
-
-  #book {
-    border-radius:0;
-    box-shadow: none;
-  }
-
-  #bookShadow { display:none; }
-
-  #controls { background:rgba(0,0,0,0.55); padding:8px 16px 10px; }
-  .dot { background:rgba(255,255,255,0.25); border-color:rgba(255,255,255,0.1); }
+  #bookWrap::after { display:none; }
+  #book { border-radius:0; box-shadow:none; }
+  #controls { background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); padding:7px 16px 10px; }
+  .dot { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.08); }
   .dot.on { background:#f4a835; border-color:#f4a835; }
-  #counter { color:rgba(255,255,255,0.55); }
-
-  #hint {
-    background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.7);
-    border-color:rgba(255,255,255,0.1);
-  }
-
-  #logo { bottom:52px; left:12px; }
-  #logo-moon { font-size:14px; }
-  #logo-text { color:rgba(255,255,255,0.55); font-size:9px; }
-
-  .zone-arrow {
-    background:rgba(255,255,255,0.15);
-    border-color:rgba(255,255,255,0.2);
-    color:#fff;
-  }
+  #counter { color:rgba(255,255,255,0.4); }
+  #logo { bottom:46px; }
+  #logo-moon { font-size:13px; }
+  #logo-text { color:rgba(255,255,255,0.38); }
+  #hint { background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.6); border-color:rgba(255,255,255,0.08); bottom:48px; }
+  .zone-arrow { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.15); color:#fff; }
+  #loader { background:#0d0700; }
+  #loader-title { color:#e89040; }
 }
 </style>
 </head>
@@ -255,58 +214,50 @@ body {
 
 <div id="stage">
   <div id="bookWrap">
-    <div id="bookShadow"></div>
     <div id="book">
-      <img id="baseImg" src="" alt="">
-      <div id="spine"></div>
+      <div id="pages"></div>
       <canvas id="flipCanvas"></canvas>
+      <div id="spine"></div>
       <div class="zone off" id="zoneL"><div class="zone-arrow">&#8249;</div></div>
-      <div class="zone" id="zoneR"><div class="zone-arrow">&#8250;</div></div>
+      <div class="zone"     id="zoneR"><div class="zone-arrow">&#8250;</div></div>
     </div>
   </div>
 </div>
 
 <div id="hint">👆 clique nas laterais para virar a página</div>
-
 <div id="controls">
   <span id="counter">1 / 12</span>
   <div id="dots"></div>
 </div>
-
-<!-- Logo Biblioteca da Lua -->
 <div id="logo">
   <span id="logo-moon">🌙</span>
   <span id="logo-text">Biblioteca<br>da Lua</span>
 </div>
 
 <script>
-// ════════════════════════════
+// ══════════════════════════════════════
 // CONFIG
-// ════════════════════════════
+// ══════════════════════════════════════
 const IMAGES = [
   '00.jpg','01.jpg','02.jpg','03.jpg',
   '04.jpg','05.jpg','06.jpg','07.jpg',
   '08.jpg','09.jpg','10.jpg','11.jpg'
 ];
 const TOTAL    = IMAGES.length;
-const DURATION = 750; // ms — mais suave
+const DURATION = 680; // ms
 
-// Pré-carrega todas as imagens
+// Pré-carrega
 const imgs = IMAGES.map(src => {
-  const i = new Image();
-  i.src = src;
-  return i;
+  const i = new Image(); i.src = src; return i;
 });
 
 let cur      = 0;
 let flipping = false;
 let hintOn   = true;
 
-// ════════════════════════════
-// ELEMENTOS
-// ════════════════════════════
+// Elementos
 const book      = document.getElementById('book');
-const baseImg   = document.getElementById('baseImg');
+const pagesEl   = document.getElementById('pages');
 const canvas    = document.getElementById('flipCanvas');
 const ctx       = canvas.getContext('2d');
 const dotsEl    = document.getElementById('dots');
@@ -318,25 +269,34 @@ const counterEl = document.getElementById('counter');
 // Dots
 IMAGES.forEach((_,i) => {
   const d = document.createElement('div');
-  d.className = 'dot' + (i===0?' on':'');
+  d.className = 'dot'+(i===0?' on':'');
   d.onclick = () => { if(!flipping && i!==cur) flip(i>cur?1:-1); };
   dotsEl.appendChild(d);
 });
 
-// ════════════════════════════
+// ══════════════════════════════════════
 // UI
-// ════════════════════════════
+// ══════════════════════════════════════
 function ui() {
-  baseImg.src = imgs[cur].src;
+  // Limpa camadas e renderiza só a página atual como fundo
+  pagesEl.innerHTML = '';
+  const layer = document.createElement('div');
+  layer.className = 'page-layer';
+  const img = document.createElement('img');
+  img.src = imgs[cur].src;
+  img.alt = '';
+  layer.appendChild(img);
+  pagesEl.appendChild(layer);
+
   counterEl.textContent = `${cur+1} / ${TOTAL}`;
   dotsEl.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i===cur));
   zoneL.classList.toggle('off', cur===0);
   zoneR.classList.toggle('off', cur===TOTAL-1);
 }
 
-// ════════════════════════════
-// RESIZE CANVAS
-// ════════════════════════════
+// ══════════════════════════════════════
+// RESIZE
+// ══════════════════════════════════════
 function resize() {
   canvas.width  = book.offsetWidth;
   canvas.height = book.offsetHeight;
@@ -344,186 +304,50 @@ function resize() {
 new ResizeObserver(resize).observe(book);
 resize();
 
-// ════════════════════════════
-// EFEITO DE PÁGINA — realista
-// Usa curva cúbica de Bezier para
-// simular a curvatura do papel
-// ════════════════════════════
+// ══════════════════════════════════════
+// FLIP ENGINE — estilo flipbook clássico
+// Técnica: 3 layers no canvas
+//   1. Página destino (embaixo)
+//   2. Página origem parcialmente visível
+//   3. Folha virando com perspectiva
+// Bug do reverso corrigido: separamos
+// completamente fwd e bwd, sem reutilizar
+// lógica entre si.
+// ══════════════════════════════════════
 function flip(dir) {
   if (flipping) return;
   const next = cur + dir;
-  if (next<0 || next>=TOTAL) return;
+  if (next < 0 || next >= TOTAL) return;
+
   flipping = true;
   hideHint();
 
+  const fwd = dir > 0;
+
+  // Snapshots em offscreen canvas para evitar artefatos
   const W = canvas.width;
   const H = canvas.height;
-  const from = imgs[cur];
-  const to   = imgs[next];
-  const fwd  = dir > 0;
-  const t0   = performance.now();
 
-  function ease(x) {
-    // ease in-out quint — mais suave nas bordas
-    return x < 0.5 ? 16*x**5 : 1 - (-2*x+2)**5/2;
-  }
+  const snapFrom = makeSnap(imgs[cur],   W, H);
+  const snapTo   = makeSnap(imgs[next],  W, H);
 
-  function drawImg(img, x, y, w, h) {
-    if (img && img.complete && img.naturalWidth>0)
-      ctx.drawImage(img, x, y, w, h);
-  }
+  const t0 = performance.now();
+
+  // Ease in-out quart — suave mas definido
+  const ease = x => x < 0.5
+    ? 8 * x ** 4
+    : 1 - (-2 * x + 2) ** 4 / 2;
 
   function frame(now) {
-    const raw = Math.min((now-t0)/DURATION, 1);
+    const raw = Math.min((now - t0) / DURATION, 1);
     const t   = ease(raw);
 
     ctx.clearRect(0, 0, W, H);
 
     if (fwd) {
-      // ── PÁGINA VIRA PARA FRENTE (direita → esquerda) ──
-
-      // 1. Página de destino embaixo
-      drawImg(to, 0, 0, W, H);
-
-      // 2. Posição da dobra — começa na direita e vai para a esquerda
-      const foldX = W * (1 - t);
-
-      // 3. Parte estática da página atual (à esquerda da dobra)
-      if (foldX > 0) {
-        ctx.save();
-        ctx.beginPath(); ctx.rect(0, 0, foldX, H); ctx.clip();
-        drawImg(from, 0, 0, W, H);
-        ctx.restore();
-      }
-
-      // 4. Parte que está virando (comprime em perspectiva)
-      const foldW  = W - foldX;
-      if (foldW > 0.5) {
-        // Compressão: cos(ângulo) — dá o efeito de perspectiva 3D
-        const angle   = t * Math.PI;
-        const cosA    = Math.cos(angle);
-        const absCosA = Math.abs(cosA);
-
-        ctx.save();
-        // Clippa só a região da dobra
-        ctx.beginPath(); ctx.rect(foldX, 0, W-foldX, H); ctx.clip();
-        ctx.translate(foldX, 0);
-
-        // Espessura visual da dobra
-        const visW = foldW * absCosA;
-
-        if (t < 0.5) {
-          // Primeira metade: frente da folha virando (imagem espelhada comprimindo)
-          if (visW > 0.5) {
-            ctx.save();
-            ctx.transform(-absCosA, 0, 0, 1, 0, 0); // espelha + comprime
-            drawImg(from, -(W - foldW*2), 0, W, H);
-            ctx.restore();
-          }
-        } else {
-          // Segunda metade: verso mostrando a próxima página
-          if (visW > 0.5) {
-            ctx.save();
-            ctx.transform(absCosA, 0, 0, 1, 0, 0); // comprime
-            drawImg(to, 0, 0, W, H);
-            ctx.restore();
-          }
-        }
-
-        // Sombra na borda da dobra
-        const sg = ctx.createLinearGradient(0, 0, Math.min(foldW*0.3, 28), 0);
-        sg.addColorStop(0, `rgba(0,0,0,${0.35 * Math.sin(angle)})`);
-        sg.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = sg;
-        ctx.fillRect(0, 0, Math.min(foldW*0.3+2, 30), H);
-
-        // Brilho na dobra
-        const shine = ctx.createLinearGradient(0, 0, Math.min(visW*0.25, 16), 0);
-        shine.addColorStop(0, `rgba(255,255,255,${0.28 * Math.sin(angle)})`);
-        shine.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = shine;
-        ctx.fillRect(0, 0, Math.min(visW*0.25+1, 18), H);
-
-        ctx.restore();
-      }
-
-      // 5. Sombra projetada da folha virando sobre a página embaixo
-      if (foldX > 1) {
-        const shadow = ctx.createLinearGradient(foldX, 0, Math.max(foldX-50, 0), 0);
-        shadow.addColorStop(0, `rgba(0,0,0,${0.20 * Math.sin(t*Math.PI)})`);
-        shadow.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = shadow;
-        ctx.fillRect(Math.max(foldX-50, 0), 0, 50, H);
-      }
-
+      drawFwd(snapFrom, snapTo, t, W, H);
     } else {
-      // ── PÁGINA VIRA PARA TRÁS (esquerda → direita) ──
-
-      drawImg(to, 0, 0, W, H);
-
-      const foldX = W * t;
-
-      // Parte estática da página atual (à direita)
-      if (W - foldX > 0) {
-        ctx.save();
-        ctx.beginPath(); ctx.rect(foldX, 0, W-foldX, H); ctx.clip();
-        drawImg(from, 0, 0, W, H);
-        ctx.restore();
-      }
-
-      // Parte virando
-      if (foldX > 0.5) {
-        const angle   = t * Math.PI;
-        const cosA    = Math.cos(angle);
-        const absCosA = Math.abs(cosA);
-
-        ctx.save();
-        ctx.beginPath(); ctx.rect(0, 0, foldX, H); ctx.clip();
-        ctx.translate(foldX, 0);
-
-        const visW = foldX * absCosA;
-
-        if (t < 0.5) {
-          if (visW > 0.5) {
-            ctx.save();
-            ctx.transform(-absCosA, 0, 0, 1, 0, 0);
-            drawImg(from, 0, 0, W, H, -W, 0, W, H);
-            ctx.restore();
-          }
-        } else {
-          if (visW > 0.5) {
-            ctx.save();
-            ctx.transform(-absCosA, 0, 0, 1, 0, 0);
-            drawImg(to, 0, 0, W, H, -W, 0, W, H);
-            ctx.restore();
-          }
-        }
-
-        // Sombra na dobra
-        const sg = ctx.createLinearGradient(0, 0, -Math.min(foldX*0.3, 28), 0);
-        sg.addColorStop(0, `rgba(0,0,0,${0.32 * Math.sin(angle)})`);
-        sg.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = sg;
-        ctx.fillRect(-Math.min(foldX*0.3+2, 30), 0, Math.min(foldX*0.3+2, 30), H);
-
-        // Brilho
-        const shine = ctx.createLinearGradient(0, 0, -Math.min(visW*0.25, 14), 0);
-        shine.addColorStop(0, `rgba(255,255,255,${0.24 * Math.sin(angle)})`);
-        shine.addColorStop(1, 'rgba(255,255,255,0)');
-        ctx.fillStyle = shine;
-        ctx.fillRect(-Math.min(visW*0.25+1, 16), 0, Math.min(visW*0.25+1, 16), H);
-
-        ctx.restore();
-      }
-
-      // Sombra projetada
-      if (foldX < W-1) {
-        const shadow = ctx.createLinearGradient(foldX, 0, Math.min(foldX+50, W), 0);
-        shadow.addColorStop(0, `rgba(0,0,0,${0.18 * Math.sin(t*Math.PI)})`);
-        shadow.addColorStop(1, 'rgba(0,0,0,0)');
-        ctx.fillStyle = shadow;
-        ctx.fillRect(foldX, 0, 50, H);
-      }
+      drawBwd(snapFrom, snapTo, t, W, H);
     }
 
     if (raw < 1) {
@@ -539,9 +363,193 @@ function flip(dir) {
   requestAnimationFrame(frame);
 }
 
-// ════════════════════════════
+// Cria snapshot de uma imagem num OffscreenCanvas
+function makeSnap(imgObj, W, H) {
+  const oc = document.createElement('canvas');
+  oc.width = W; oc.height = H;
+  const oc2 = oc.getContext('2d');
+  if (imgObj && imgObj.complete && imgObj.naturalWidth > 0) {
+    oc2.drawImage(imgObj, 0, 0, W, H);
+  }
+  return oc;
+}
+
+// ──────────────────────────────────────
+// VIRAR PARA FRENTE (→)
+// A folha sai do lado DIREITO e vai até o ESQUERDO
+// ──────────────────────────────────────
+function drawFwd(from, to, t, W, H) {
+  // Ângulo: 0 (direita) → π (esquerda)
+  const angle  = t * Math.PI;
+  const cosA   = Math.cos(angle); // +1 → 0 → -1
+  const sinA   = Math.sin(angle); // 0 → 1 → 0 (para sombra)
+
+  // Posição X da dobra — começa em W (direita), termina em 0 (esquerda)
+  const foldX = W * (1 - t);
+
+  // 1. Página destino embaixo (visível inteira)
+  ctx.drawImage(to, 0, 0, W, H);
+
+  // 2. Parte estática da página de origem (à esquerda da dobra)
+  if (foldX > 0) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(0, 0, foldX, H); ctx.clip();
+    ctx.drawImage(from, 0, 0, W, H);
+    ctx.restore();
+  }
+
+  // 3. Sombra projetada pela folha virando sobre a página destino
+  if (foldX > 0 && sinA > 0.01) {
+    const shadowW = Math.min(60, foldX);
+    const x0 = Math.max(foldX - shadowW, 0);
+    const sg = ctx.createLinearGradient(foldX, 0, x0, 0);
+    sg.addColorStop(0, `rgba(0,0,0,${0.28 * sinA})`);
+    sg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(x0, 0, shadowW, H);
+  }
+
+  // 4. A folha virando
+  // Na primeira metade (t < 0.5): mostra a FRENTE da origem (comprimindo)
+  // Na segunda metade (t > 0.5): mostra o VERSO — que é a página destino (comprimindo de volta)
+  const pageW = W * Math.abs(cosA); // largura aparente da folha virando
+
+  if (pageW > 0.5) {
+    ctx.save();
+    // Clip na área à direita da dobra
+    ctx.beginPath(); ctx.rect(foldX, 0, W - foldX, H); ctx.clip();
+
+    if (cosA >= 0) {
+      // FRENTE da folha (t < 0.5): página de origem comprimindo
+      // Ela aparece à direita da dobra, indo de pageW até 0
+      ctx.drawImage(from,
+        W - pageW, 0, pageW, H,   // src: fatia direita da imagem original
+        foldX, 0, pageW, H        // dst: posicionada na dobra
+      );
+    } else {
+      // VERSO da folha (t > 0.5): página destino comprimindo de volta
+      // Espelhada horizontalmente
+      ctx.save();
+      ctx.translate(foldX + pageW, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(to,
+        0, 0, pageW, H,
+        0, 0, pageW, H
+      );
+      ctx.restore();
+    }
+
+    // Sombra da dobra (borda esquerda da folha virando)
+    const foldShW = Math.min(pageW * 0.3, 28);
+    if (foldShW > 0 && sinA > 0.01) {
+      const fsg = ctx.createLinearGradient(foldX, 0, foldX + foldShW, 0);
+      fsg.addColorStop(0, `rgba(0,0,0,${0.42 * sinA})`);
+      fsg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = fsg;
+      ctx.fillRect(foldX, 0, foldShW, H);
+    }
+
+    // Brilho na dobra
+    const shineW = Math.min(pageW * 0.1, 14);
+    if (shineW > 0 && sinA > 0.01) {
+      const bsg = ctx.createLinearGradient(foldX, 0, foldX + shineW, 0);
+      bsg.addColorStop(0, `rgba(255,255,255,${0.32 * sinA})`);
+      bsg.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = bsg;
+      ctx.fillRect(foldX, 0, shineW, H);
+    }
+
+    ctx.restore();
+  }
+}
+
+// ──────────────────────────────────────
+// VIRAR PARA TRÁS (←)
+// A folha sai do lado ESQUERDO e vai até o DIREITO
+// ──────────────────────────────────────
+function drawBwd(from, to, t, W, H) {
+  const angle = t * Math.PI;
+  const cosA  = Math.cos(angle); // +1 → 0 → -1
+  const sinA  = Math.sin(angle);
+
+  // Posição X da dobra — começa em 0 (esquerda), termina em W (direita)
+  const foldX = W * t;
+
+  // 1. Página destino embaixo (inteira)
+  ctx.drawImage(to, 0, 0, W, H);
+
+  // 2. Parte estática da página atual (à direita da dobra)
+  if (foldX < W) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(foldX, 0, W - foldX, H); ctx.clip();
+    ctx.drawImage(from, 0, 0, W, H);
+    ctx.restore();
+  }
+
+  // 3. Sombra projetada à direita
+  if (foldX < W && sinA > 0.01) {
+    const shadowW = Math.min(60, W - foldX);
+    const sg = ctx.createLinearGradient(foldX, 0, foldX + shadowW, 0);
+    sg.addColorStop(0, `rgba(0,0,0,${0.26 * sinA})`);
+    sg.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = sg;
+    ctx.fillRect(foldX, 0, shadowW, H);
+  }
+
+  // 4. Folha virando
+  const pageW = W * Math.abs(cosA);
+
+  if (pageW > 0.5) {
+    ctx.save();
+    // Clip na área à esquerda da dobra
+    ctx.beginPath(); ctx.rect(0, 0, foldX, H); ctx.clip();
+
+    if (cosA >= 0) {
+      // FRENTE (t < 0.5): página de origem, lado esquerdo comprimindo
+      // Aparece à esquerda da dobra, espelhada
+      ctx.save();
+      ctx.translate(foldX, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(from,
+        0, 0, pageW, H,
+        0, 0, pageW, H
+      );
+      ctx.restore();
+    } else {
+      // VERSO (t > 0.5): página destino, lado esquerdo comprimindo de volta
+      ctx.drawImage(to,
+        0, 0, pageW, H,
+        foldX - pageW, 0, pageW, H
+      );
+    }
+
+    // Sombra da dobra (borda direita da folha)
+    const foldShW = Math.min(pageW * 0.3, 28);
+    if (foldShW > 0 && sinA > 0.01) {
+      const fsg = ctx.createLinearGradient(foldX, 0, foldX - foldShW, 0);
+      fsg.addColorStop(0, `rgba(0,0,0,${0.4 * sinA})`);
+      fsg.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = fsg;
+      ctx.fillRect(foldX - foldShW, 0, foldShW, H);
+    }
+
+    // Brilho
+    const shineW = Math.min(pageW * 0.1, 14);
+    if (shineW > 0 && sinA > 0.01) {
+      const bsg = ctx.createLinearGradient(foldX, 0, foldX - shineW, 0);
+      bsg.addColorStop(0, `rgba(255,255,255,${0.28 * sinA})`);
+      bsg.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = bsg;
+      ctx.fillRect(foldX - shineW, 0, shineW, H);
+    }
+
+    ctx.restore();
+  }
+}
+
+// ══════════════════════════════════════
 // CONTROLES
-// ════════════════════════════
+// ══════════════════════════════════════
 zoneL.onclick = () => flip(-1);
 zoneR.onclick = () => flip(1);
 
@@ -550,7 +558,6 @@ document.addEventListener('keydown', e => {
   if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   flip(-1);
 });
 
-// Touch swipe
 let tx0=0, ty0=0, tt0=0;
 document.addEventListener('touchstart', e => {
   tx0=e.touches[0].clientX; ty0=e.touches[0].clientY; tt0=Date.now();
@@ -563,17 +570,24 @@ document.addEventListener('touchend', e => {
     flip(dx<0?1:-1);
 }, {passive:true});
 
-// ════════════════════════════
+// ══════════════════════════════════════
 // HINT
-// ════════════════════════════
+// ══════════════════════════════════════
 function hideHint() {
   if (hintOn) { hintEl.classList.add('out'); hintOn=false; }
 }
 setTimeout(hideHint, 5000);
 
-// ════════════════════════════
+// ══════════════════════════════════════
+// SERVICE WORKER
+// ══════════════════════════════════════
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+// ══════════════════════════════════════
 // LOADER
-// ════════════════════════════
+// ══════════════════════════════════════
 let loaded = 0;
 function onLoad() {
   loaded++;
