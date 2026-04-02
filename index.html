@@ -22,7 +22,6 @@ html, body {
   background: linear-gradient(160deg, #fdf8f0 0%, #f5e8d8 50%, #fdf4e8 100%);
 }
 
-/* ── TÍTULO TOPO ── */
 #topbar {
   position:fixed; top:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
@@ -33,13 +32,11 @@ html, body {
   color:#a06830; text-transform:uppercase; opacity:0.6;
 }
 
-/* ── STAGE ── */
 #stage {
   position:fixed; inset:0; z-index:10;
   display:flex; align-items:center; justify-content:center;
 }
 
-/* ── WRAPPER ── */
 #book-wrapper {
   position:relative;
   display:flex; align-items:center; justify-content:center;
@@ -52,17 +49,25 @@ html, body {
   pointer-events:none;
 }
 
-#book-container { position:relative; }
+/* Páginas HTML para o StPageFlip */
+.page {
+  background: #fff;
+  overflow: hidden;
+}
+.page img {
+  width:100%; height:100%;
+  object-fit:cover; display:block;
+  pointer-events:none;
+}
 
+/* StPageFlip container */
+#book-container { position:relative; }
 #book-container canvas {
   border-radius:3px 8px 8px 3px;
-  box-shadow:
-    0 2px 8px rgba(0,0,0,0.07),
-    0 8px 40px rgba(100,60,10,0.14);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07), 0 8px 40px rgba(100,60,10,0.14);
   display:block;
 }
 
-/* ── BOTÕES ── */
 .nav-btn {
   position:fixed; top:50%; transform:translateY(-50%);
   width:46px; height:46px; border-radius:50%;
@@ -80,7 +85,6 @@ html, body {
 #btnPrev { left:14px; }
 #btnNext { right:14px; }
 
-/* ── CONTROLES ── */
 #controls {
   position:fixed; bottom:0; left:0; right:0; z-index:50;
   display:flex; align-items:center; justify-content:center;
@@ -95,26 +99,23 @@ html, body {
 .dot.on { background:#d4884a; transform:scale(1.45); border-color:#d4884a; }
 #counter { font-size:11px; color:#a07040; letter-spacing:1.8px; opacity:0.6; min-width:46px; text-align:center; }
 
-/* ── LOGO ── */
 #logo {
   position:fixed; bottom:15px; left:16px; z-index:100;
   display:flex; align-items:center; gap:5px; opacity:0.48; pointer-events:none;
 }
 #logo-moon { font-size:15px; line-height:1; }
-#logo-text { font-size:9px; letter-spacing:1.5px; color:#a06830; text-transform:uppercase; font-family:Georgia,serif; line-height:1.35; }
+#logo-text { font-size:9px; letter-spacing:1.5px; color:#a06830; text-transform:uppercase; line-height:1.35; }
 
-/* ── HINT ── */
 #hint {
   position:fixed; bottom:46px; left:50%; transform:translateX(-50%);
   background:rgba(255,255,255,0.9); color:#a06830;
   font-size:11px; padding:5px 14px; border-radius:20px;
   border:1px solid rgba(160,100,40,0.15);
   z-index:50; pointer-events:none; white-space:nowrap;
-  box-shadow:0 2px 10px rgba(120,70,10,0.08); transition:opacity 1.5s;
+  transition:opacity 1.5s;
 }
 #hint.out { opacity:0; }
 
-/* ── LOADER ── */
 #loader {
   position:fixed; inset:0; z-index:999;
   background:#fdf6ee;
@@ -131,7 +132,6 @@ html, body {
 #loader-title { font-size:18px; color:#c07838; letter-spacing:2.5px; font-style:italic; opacity:0.85; }
 #loader-sub { font-size:11px; color:#c09060; letter-spacing:2px; opacity:0.5; }
 
-/* ── MOBILE ── */
 @media (max-width:768px) {
   html,body { background:#111; }
   #topbar { display:none; }
@@ -143,7 +143,6 @@ html, body {
   .dot.on { background:#f4a835; border-color:#f4a835; }
   #counter { color:rgba(255,255,255,0.4); }
   .nav-btn { background:rgba(255,255,255,0.12); border-color:rgba(255,255,255,0.15); color:#fff; box-shadow:none; }
-  .nav-btn:hover { background:rgba(255,255,255,0.2); }
   #logo { bottom:46px; }
   #logo-moon { font-size:13px; }
   #logo-text { color:rgba(255,255,255,0.38); }
@@ -165,7 +164,33 @@ html, body {
 
 <div id="stage">
   <div id="book-wrapper">
-    <div id="book-container"></div>
+    <!-- Páginas HTML — o StPageFlip usa HTML em vez de canvas -->
+    <div id="book-container">
+      <div class="page"><img src="pascoa-da-lua/00_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/00_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/01_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/01_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/02_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/02_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/03_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/03_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/04_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/04_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/05_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/05_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/06_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/06_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/07_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/07_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/08_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/08_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/09_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/09_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/10_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/10_R.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/11_L.jpg" alt=""></div>
+      <div class="page"><img src="pascoa-da-lua/11_R.jpg" alt=""></div>
+    </div>
   </div>
 </div>
 
@@ -184,33 +209,7 @@ html, body {
 
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <script>
-// ══════════════════════════════════════
-// IMAGENS — pasta pascoa-da-lua/
-// Cada imagem original foi cortada em L (esquerda) e R (direita)
-// A StPageFlip exibe duas meias-páginas lado a lado
-// formando uma página completa 16:9
-// ══════════════════════════════════════
-const FOLDER = 'pascoa-da-lua/';
-
-// Todas as meias-páginas em ordem de exibição
-// O livro abre mostrando: [00_L | 00_R], vira para [01_L | 01_R], etc.
-const PAGES = [
-  '00_L.jpg', '00_R.jpg',
-  '01_L.jpg', '01_R.jpg',
-  '02_L.jpg', '02_R.jpg',
-  '03_L.jpg', '03_R.jpg',
-  '04_L.jpg', '04_R.jpg',
-  '05_L.jpg', '05_R.jpg',
-  '06_L.jpg', '06_R.jpg',
-  '07_L.jpg', '07_R.jpg',
-  '08_L.jpg', '08_R.jpg',
-  '09_L.jpg', '09_R.jpg',
-  '10_L.jpg', '10_R.jpg',
-  '11_L.jpg', '11_R.jpg',
-];
-
-// Número de "páginas do livro" (cada página = 1 spread = 2 meias)
-const TOTAL_SPREADS = PAGES.length / 2; // 12
+const TOTAL_SPREADS = 12;
 
 let pageFlip  = null;
 let curSpread = 0;
@@ -223,7 +222,7 @@ const btnPrev   = document.getElementById('btnPrev');
 const btnNext   = document.getElementById('btnNext');
 const hintEl    = document.getElementById('hint');
 
-// Dots — um por spread
+// Dots
 for (let i = 0; i < TOTAL_SPREADS; i++) {
   const d = document.createElement('div');
   d.className = 'dot' + (i===0?' on':'');
@@ -232,8 +231,6 @@ for (let i = 0; i < TOTAL_SPREADS; i++) {
 }
 
 function updateUI(pageIndex) {
-  // pageIndex é o índice da meia-página atual (0..23)
-  // spread = qual "virada" estamos (0..11)
   curSpread = Math.floor(pageIndex / 2);
   counterEl.textContent = `${curSpread + 1} / ${TOTAL_SPREADS}`;
   dotsEl.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i === curSpread));
@@ -241,14 +238,10 @@ function updateUI(pageIndex) {
   btnNext.classList.toggle('off', curSpread === TOTAL_SPREADS - 1);
 }
 
-// ── Dimensões ──
-// Cada meia-página é 8:9 (metade de 16:9)
-// O spread completo (duas meias) é 16:9
 function calcSize() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const mob = vw <= 768;
-
   let spreadW, spreadH;
   if (mob) {
     spreadW = vw;
@@ -259,39 +252,32 @@ function calcSize() {
     spreadH = Math.round(spreadW * 9/16);
     if (spreadH > mxH) { spreadH = mxH; spreadW = Math.round(spreadH * 16/9); }
   }
-
-  // Cada meia-página tem metade da largura do spread
   const pageW = Math.floor(spreadW / 2);
   const pageH = Math.floor(spreadH);
-
-  return { pageW, pageH, spreadW: pageW * 2, spreadH: pageH };
+  return { pageW, pageH };
 }
 
-// ── Inicia o flipbook ──
 function initFlipBook() {
   const { pageW, pageH } = calcSize();
   const mob = window.innerWidth <= 768;
 
-  if (pageFlip) {
-    container.innerHTML = '';
-    pageFlip = null;
-  }
+  if (pageFlip) { pageFlip.destroy(); pageFlip = null; }
+
+  // Ajusta tamanho de cada .page
+  document.querySelectorAll('.page').forEach(p => {
+    p.style.width  = pageW + 'px';
+    p.style.height = pageH + 'px';
+  });
 
   pageFlip = new St.PageFlip(container, {
-    width:    pageW,   // largura de UMA meia-página
-    height:   pageH,   // altura da página
-
+    width:    pageW,
+    height:   pageH,
     size:     'fixed',
-    minWidth: pageW,
-    maxWidth: pageW,
-    minHeight: pageH,
-    maxHeight: pageH,
-
     drawShadow:          true,
     flippingTime:        750,
-    usePortrait:         false,  // landscape = duas páginas lado a lado
+    usePortrait:         false,
     startZIndex:         0,
-    autoSize:            true,
+    autoSize:            false,
     maxShadowOpacity:    0.6,
     showCover:           false,
     mobileScrollSupport: false,
@@ -302,8 +288,8 @@ function initFlipBook() {
     disableFlipByClick:  false,
   });
 
-  // Carrega todas as meias-páginas
-  pageFlip.loadFromImages(PAGES.map(p => FOLDER + p));
+  // ★ Carrega de HTML em vez de imagens — resolve o problema de canvas/CORS
+  pageFlip.loadFromHTML(document.querySelectorAll('.page'));
 
   pageFlip.on('flip', (e) => {
     updateUI(e.data);
@@ -315,7 +301,6 @@ function initFlipBook() {
     setTimeout(() => document.getElementById('loader').classList.add('out'), 400);
   });
 
-  // Mobile: centraliza verticalmente
   if (mob) {
     container.style.position  = 'absolute';
     container.style.top       = '50%';
@@ -326,7 +311,6 @@ function initFlipBook() {
   }
 }
 
-// ── Botões ──
 btnPrev.onclick = () => { if(pageFlip) { pageFlip.flipPrev(); hideHint(); } };
 btnNext.onclick = () => { if(pageFlip) { pageFlip.flipNext(); hideHint(); } };
 
@@ -336,13 +320,11 @@ document.addEventListener('keydown', e => {
   if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   { pageFlip.flipPrev(); hideHint(); }
 });
 
-// ── Hint ──
 function hideHint() {
   if (hintOn) { hintEl.classList.add('out'); hintOn=false; }
 }
 setTimeout(hideHint, 5000);
 
-// ── Resize ──
 let rsTimer;
 window.addEventListener('resize', () => {
   clearTimeout(rsTimer);
@@ -353,12 +335,10 @@ window.addEventListener('resize', () => {
   }, 300);
 });
 
-// ── Service Worker ──
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
-// ── Inicia ──
 initFlipBook();
 </script>
 </body>
