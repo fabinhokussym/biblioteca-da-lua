@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- v10 -->
+<!-- v13 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -25,34 +25,7 @@ html, body {
   touch-action: none;
 }
 
-/* Stage ocupa tudo */
-#stage {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* O container do StPageFlip — tamanho definido via JS */
-#flip-book {
-  display: block;
-}
-
-/* Páginas — tamanho definido via JS */
-.page {
-  overflow: hidden;
-  background: #f0e8d8;
-}
-.page img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  pointer-events: none;
-}
-
-/* Controles inferiores */
+/* Controles fixos na parte inferior */
 #controls {
   position: fixed;
   bottom: 0; left: 0; right: 0;
@@ -61,14 +34,15 @@ html, body {
   align-items: center;
   justify-content: center;
   gap: 16px;
-  padding: 8px 20px 12px;
-  background: rgba(245,236,224,0.85);
-  backdrop-filter: blur(4px);
+  padding: 9px 20px 11px;
+  background: rgba(245,236,224,0.92);
+  backdrop-filter: blur(6px);
 }
 
 #dots { display: flex; gap: 6px; align-items: center; }
 .dot {
-  width: 7px; height: 7px; border-radius: 50%;
+  width: 7px; height: 7px;
+  border-radius: 50%;
   background: rgba(150,90,30,0.22);
   border: 1px solid rgba(150,90,30,0.14);
   cursor: pointer;
@@ -82,17 +56,63 @@ html, body {
   min-width: 44px; text-align: center;
 }
 
+/* Stage — centraliza o livro na área disponível */
+#stage {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  /* bottom calculado via JS para deixar espaço pros controles */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* O flip-book — tamanho definido via JS */
+#flip-book {
+  position: relative;
+  box-shadow: 0 4px 36px rgba(100,60,10,0.18), 0 2px 8px rgba(0,0,0,0.08);
+}
+
+/* Lombada */
+#spine {
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 6px;
+  background: linear-gradient(to right,
+    rgba(60,30,0,0) 0%,
+    rgba(60,30,0,0.18) 35%,
+    rgba(60,30,0,0.38) 50%,
+    rgba(60,30,0,0.18) 65%,
+    rgba(60,30,0,0) 100%
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* Páginas */
+.page {
+  overflow: hidden;
+  background: #f0e8d8;
+}
+.page img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
 /* Logo */
 #logo {
   position: fixed;
-  bottom: 14px; left: 14px;
+  bottom: 13px; left: 13px;
   z-index: 60;
-  display: flex; align-items: center; gap: 5px;
-  opacity: 0.45; pointer-events: none;
+  display: flex; align-items: center; gap: 4px;
+  opacity: 0.4; pointer-events: none;
 }
-#logo-moon { font-size: 14px; line-height: 1; }
-#logo-text {
-  font-size: 8px; letter-spacing: 1.4px;
+#logo span:first-child { font-size: 13px; }
+#logo span:last-child {
+  font-size: 8px; letter-spacing: 1.3px;
   color: #a06830; text-transform: uppercase; line-height: 1.3;
 }
 
@@ -101,7 +121,7 @@ html, body {
   position: fixed;
   bottom: 50px; left: 50%; transform: translateX(-50%);
   background: rgba(255,255,255,0.92); color: #a06830;
-  font-size: 11px; padding: 5px 14px; border-radius: 20px;
+  font-size: 10px; padding: 4px 12px; border-radius: 20px;
   border: 1px solid rgba(160,100,40,0.15);
   z-index: 60; pointer-events: none; white-space: nowrap;
   transition: opacity 1.5s;
@@ -125,17 +145,18 @@ html, body {
 #loader-title { font-size: 18px; color: #c07838; letter-spacing: 2.5px; font-style: italic; opacity: 0.85; }
 #loader-sub   { font-size: 11px; color: #c09060; letter-spacing: 2px; opacity: 0.5; }
 
-/* Mobile escuro */
+/* Mobile */
 @media (max-width: 768px) {
   html, body { background: #111; }
-  #controls { background: rgba(0,0,0,0.6); }
+  #controls { background: rgba(0,0,0,0.65); backdrop-filter: blur(6px); }
   .dot { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.1); }
   .dot.on { background: #f4a835; border-color: #f4a835; }
   #counter { color: rgba(255,255,255,0.5); }
-  #logo-text { color: rgba(255,255,255,0.4); }
+  #logo span:last-child { color: rgba(255,255,255,0.4); }
   #hint { background: rgba(0,0,0,0.6); color: rgba(255,255,255,0.7); border-color: rgba(255,255,255,0.1); }
   #loader { background: #0d0700; }
   #loader-title { color: #e89040; }
+  #flip-book { box-shadow: none; }
 }
 </style>
 </head>
@@ -147,55 +168,46 @@ html, body {
   <p id="loader-sub">Abrindo o livro...</p>
 </div>
 
-<div id="stage">
-  <div id="flip-book">
-    <div class="page"><img src="pascoa-da-lua/00_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/00_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/01_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/01_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/02_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/02_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/03_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/03_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/04_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/04_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/05_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/05_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/06_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/06_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/07_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/07_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/08_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/08_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/09_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/09_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/10_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/10_R.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/11_L.jpg" alt=""></div>
-    <div class="page"><img src="pascoa-da-lua/11_R.jpg" alt=""></div>
-  </div>
-</div>
-
-<div id="hint">👆 clique nas laterais ou deslize para virar</div>
-
+<!-- Controles sempre visíveis -->
 <div id="controls">
   <span id="counter">1 / 12</span>
   <div id="dots"></div>
 </div>
 
+<!-- Stage onde o livro é criado via JS -->
+<div id="stage"></div>
+
+<div id="hint">👆 clique nas laterais ou deslize para virar</div>
 <div id="logo">
-  <span id="logo-moon">🌙</span>
-  <span id="logo-text">Biblioteca<br>da Lua</span>
+  <span>🌙</span>
+  <span>Biblioteca<br>da Lua</span>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
 <script>
+const SRCS = [
+  'pascoa-da-lua/00_L.jpg','pascoa-da-lua/00_R.jpg',
+  'pascoa-da-lua/01_L.jpg','pascoa-da-lua/01_R.jpg',
+  'pascoa-da-lua/02_L.jpg','pascoa-da-lua/02_R.jpg',
+  'pascoa-da-lua/03_L.jpg','pascoa-da-lua/03_R.jpg',
+  'pascoa-da-lua/04_L.jpg','pascoa-da-lua/04_R.jpg',
+  'pascoa-da-lua/05_L.jpg','pascoa-da-lua/05_R.jpg',
+  'pascoa-da-lua/06_L.jpg','pascoa-da-lua/06_R.jpg',
+  'pascoa-da-lua/07_L.jpg','pascoa-da-lua/07_R.jpg',
+  'pascoa-da-lua/08_L.jpg','pascoa-da-lua/08_R.jpg',
+  'pascoa-da-lua/09_L.jpg','pascoa-da-lua/09_R.jpg',
+  'pascoa-da-lua/10_L.jpg','pascoa-da-lua/10_R.jpg',
+  'pascoa-da-lua/11_L.jpg','pascoa-da-lua/11_R.jpg',
+];
 const TOTAL = 12;
+
 let pf        = null;
 let curSpread = 0;
 let hintOn    = true;
+let started   = false;
 
-const bookEl    = document.getElementById('flip-book');
+const stage     = document.getElementById('stage');
+const controls  = document.getElementById('controls');
 const dotsEl    = document.getElementById('dots');
 const counterEl = document.getElementById('counter');
 const hintEl    = document.getElementById('hint');
@@ -208,25 +220,21 @@ for (let i = 0; i < TOTAL; i++) {
   dotsEl.appendChild(d);
 }
 
-function updateUI(pageIndex) {
-  curSpread = Math.floor(pageIndex / 2);
+function updateUI(idx) {
+  curSpread = Math.floor(idx / 2);
   counterEl.textContent = `${curSpread + 1} / ${TOTAL}`;
   dotsEl.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === curSpread));
 }
 
-// ── Calcula pageW e pageH ──
-// O spread completo (L+R) = 16:9
-// Cada page = metade do spread = 8:9
+// ── Calcula dimensões ──
 function getSize() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const controlsH = 42; // barra inferior
+  const ctrlH = controls.getBoundingClientRect().height || 42;
 
-  // Disponível
   const availW = vw;
-  const availH = vh - controlsH;
+  const availH = vh - ctrlH;
 
-  // Spread 16:9
   let sw = availW;
   let sh = Math.round(sw * 9 / 16);
   if (sh > availH) {
@@ -234,37 +242,56 @@ function getSize() {
     sw = Math.round(sh * 16 / 9);
   }
 
-  // Garante valores pares para dividir ao meio exatamente
   sw = Math.floor(sw / 2) * 2;
   sh = Math.floor(sh);
 
-  return {
-    pageW: sw / 2,
-    pageH: sh
-  };
+  return { pageW: sw / 2, pageH: sh, spreadW: sw };
 }
 
-// ── Inicia ou reinicia o StPageFlip ──
-function init() {
-  const { pageW, pageH } = getSize();
+// ── Cria tudo do zero (igual ao F5) ──
+function build() {
+  const prev = curSpread;
 
-  // Para e limpa instância anterior
-  if (pf) {
-    try { pf.destroy(); } catch (e) {}
-    pf = null;
-  }
+  // 1. Destrói instância anterior
+  if (pf) { try { pf.destroy(); } catch(e){} pf = null; }
 
-  // ★ Define tamanho explícito em cada .page ANTES da biblioteca
-  document.querySelectorAll('.page').forEach(p => {
-    p.style.width  = pageW + 'px';
-    p.style.height = pageH + 'px';
-  });
+  // 2. Limpa o stage completamente
+  stage.innerHTML = '';
 
-  // ★ Define tamanho explícito no container ANTES da biblioteca
-  bookEl.style.width  = (pageW * 2) + 'px';
+  // 3. Calcula tamanho
+  const { pageW, pageH, spreadW } = getSize();
+
+  // 4. Ajusta altura do stage
+  const ctrlH = controls.getBoundingClientRect().height || 42;
+  stage.style.bottom = ctrlH + 'px';
+
+  // 5. Cria o flip-book do zero
+  const bookEl = document.createElement('div');
+  bookEl.id = 'flip-book';
+  bookEl.style.width  = spreadW + 'px';
   bookEl.style.height = pageH + 'px';
 
-  // Cria nova instância
+  // 6. Cria as páginas
+  SRCS.forEach(src => {
+    const page = document.createElement('div');
+    page.className = 'page';
+    page.style.width  = pageW + 'px';
+    page.style.height = pageH + 'px';
+    const img = document.createElement('img');
+    img.src = src; img.alt = '';
+    page.appendChild(img);
+    bookEl.appendChild(page);
+  });
+
+  // 7. Cria a lombada
+  const spine = document.createElement('div');
+  spine.id = 'spine';
+  spine.style.left = (spreadW / 2 - 3) + 'px';
+  bookEl.appendChild(spine);
+
+  stage.appendChild(bookEl);
+
+  // 8. Inicia StPageFlip
   pf = new St.PageFlip(bookEl, {
     width:    pageW,
     height:   pageH,
@@ -288,7 +315,7 @@ function init() {
     startZIndex:         0,
   });
 
-  pf.loadFromHTML(document.querySelectorAll('.page'));
+  pf.loadFromHTML(bookEl.querySelectorAll('.page'));
 
   pf.on('flip', e => {
     updateUI(e.data);
@@ -296,8 +323,16 @@ function init() {
   });
 
   pf.on('init', () => {
-    updateUI(curSpread * 2);
-    document.getElementById('loader').classList.add('out');
+    // Volta para a página correta após rebuild
+    if (prev > 0) {
+      setTimeout(() => { if (pf) pf.flip(prev * 2); }, 200);
+    } else {
+      updateUI(0);
+    }
+    if (!started) {
+      started = true;
+      document.getElementById('loader').classList.add('out');
+    }
   });
 }
 
@@ -306,40 +341,6 @@ function hideHint() {
 }
 setTimeout(hideHint, 5000);
 
-// ── Resize e orientação ──
-let rsTimer = null;
-
-function scheduleInit() {
-  clearTimeout(rsTimer);
-  // Guarda spread atual antes de reiniciar
-  rsTimer = setTimeout(() => {
-    const prev = curSpread;
-    init();
-    // Restaura página após reiniciar
-    if (prev > 0) {
-      setTimeout(() => { if (pf) pf.flip(prev * 2); }, 300);
-    }
-  }, 350);
-}
-
-window.addEventListener('resize', scheduleInit);
-window.addEventListener('orientationchange', () => {
-  clearTimeout(rsTimer);
-  // Espera mais tempo no iOS para rotação completar
-  rsTimer = setTimeout(() => {
-    const prev = curSpread;
-    init();
-    if (prev > 0) {
-      setTimeout(() => { if (pf) pf.flip(prev * 2); }, 300);
-    }
-  }, 600);
-});
-
-// visualViewport é o mais confiável em iOS Safari
-if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', scheduleInit);
-}
-
 // Teclado
 document.addEventListener('keydown', e => {
   if (!pf) return;
@@ -347,12 +348,28 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { pf.flipPrev(); hideHint(); }
 });
 
+// ── Resize: rebuild completo igual ao F5 ──
+let rsTimer = null;
+function scheduleRebuild() {
+  clearTimeout(rsTimer);
+  rsTimer = setTimeout(build, 350);
+}
+
+window.addEventListener('resize', scheduleRebuild);
+window.addEventListener('orientationchange', () => {
+  clearTimeout(rsTimer);
+  rsTimer = setTimeout(build, 600);
+});
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', scheduleRebuild);
+}
+
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
 // ── Inicia ──
-init();
+build();
 </script>
 </body>
 </html>
