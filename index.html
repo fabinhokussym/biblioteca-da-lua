@@ -368,6 +368,29 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
 
+// ── Tela cheia automática no celular em landscape ──
+function tryFullscreen() {
+  const isLandscape = window.innerWidth > window.innerHeight;
+  const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  if (isMobile && isLandscape) {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+    if (req) req.call(el).catch(() => {});
+  }
+}
+
+// Tenta ao virar o celular
+window.addEventListener('orientationchange', () => {
+  setTimeout(tryFullscreen, 500);
+});
+
+// Tenta ao tocar na tela (necessário no iOS — fullscreen só funciona com gesto do usuário)
+document.addEventListener('touchstart', tryFullscreen, { once: false, passive: true });
+
+// Tenta ao clicar
+document.addEventListener('click', tryFullscreen, { once: false });
+
 // ── Inicia ──
 build();
 </script>
