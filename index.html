@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- v7 -->
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -12,216 +13,187 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <title>A Páscoa da Lua — Biblioteca da Lua</title>
 <style>
-*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 
 html, body {
-  width: 100%; height: 100%;
-  overflow: hidden;
-  background: #f5ece0;
-  font-family: Georgia, serif;
-  user-select: none;
-  -webkit-user-select: none;
-  touch-action: none;
+  width:100%; height:100%;
+  overflow:hidden;
+  background:#f5ece0;
+  font-family:Georgia, serif;
+  user-select:none; -webkit-user-select:none;
+  touch-action:none;
 }
 
-/* ── STAGE: centraliza o livro ── */
+/* Stage centraliza o livro */
 #stage {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  position:fixed; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  z-index:10;
 }
 
-/* ── LIVRO ── */
+/* Livro */
 #book {
-  position: relative;
-  /* tamanho definido via JS */
-  perspective: 2500px;
+  position:relative;
+  flex-shrink:0;
+  box-shadow:0 4px 40px rgba(100,60,10,0.18), 0 2px 8px rgba(0,0,0,0.08);
 }
 
-/* Sombra embaixo */
-#book::after {
-  content: '';
-  position: absolute;
-  bottom: -14px; left: 6%; right: 6%; height: 16px;
-  background: radial-gradient(ellipse at 50% 0%, rgba(80,40,5,0.13) 0%, transparent 70%);
-  pointer-events: none;
+/* Páginas dentro do livro */
+#pages {
+  position:absolute; inset:0;
+  overflow:hidden;
 }
 
-/* ── PÁGINA ── */
-/* Cada "virada" tem duas faces: frente e verso */
-.flip-page {
-  position: absolute;
-  top: 0; left: 0;
-  width: 50%; height: 100%;
-  transform-style: preserve-3d;
-  transform-origin: right center;
-  transition: transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1.000);
-  /* z-index gerenciado via JS */
+/* Cada meia-página (L ou R) */
+.half {
+  position:absolute;
+  top:0; height:100%;
+  width:50%;
+  overflow:hidden;
+}
+.half.left  { left:0; }
+.half.right { left:50%; }
+.half img {
+  width:100%; height:100%;
+  object-fit:cover; display:block;
+  pointer-events:none;
 }
 
-.flip-page.left-side {
-  transform-origin: left center;
+/* Página que está virando — CSS 3D */
+.flipping {
+  position:absolute;
+  top:0; height:100%; width:50%;
+  transform-style:preserve-3d;
+  z-index:20;
+}
+.flipping .face {
+  position:absolute; inset:0;
+  backface-visibility:hidden;
+  -webkit-backface-visibility:hidden;
+  overflow:hidden;
+}
+.flipping .face img {
+  width:100%; height:100%;
+  object-fit:cover; display:block;
+}
+.flipping .face.back {
+  transform:rotateY(180deg);
 }
 
-.face {
-  position: absolute;
-  inset: 0;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  overflow: hidden;
-}
-
-.face img {
-  width: 100%; height: 100%;
-  object-fit: cover; display: block;
-  pointer-events: none;
-}
-
-.face.back {
-  transform: rotateY(180deg);
-}
-
-/* Sombra de dobra — aparece no canvas sobre a página */
-.fold-shadow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 2;
-}
-
-/* ── SPINE (lombada central) ── */
+/* Lombada */
 #spine {
-  position: absolute;
-  top: 0; bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 4px;
-  background: linear-gradient(to right,
-    rgba(60,30,0,0) 0%,
-    rgba(60,30,0,0.2) 40%,
-    rgba(60,30,0,0.35) 50%,
-    rgba(60,30,0,0.2) 60%,
-    rgba(60,30,0,0) 100%
-  );
-  z-index: 100;
-  pointer-events: none;
+  position:absolute; top:0; bottom:0;
+  left:calc(50% - 2px); width:4px;
+  background:linear-gradient(to right,
+    rgba(60,30,0,0) 0%, rgba(60,30,0,0.2) 40%,
+    rgba(60,30,0,0.38) 50%, rgba(60,30,0,0.2) 60%,
+    rgba(60,30,0,0) 100%);
+  z-index:30; pointer-events:none;
 }
 
-/* ── ZONAS CLICÁVEIS ── */
+/* Zonas clicáveis — FORA do #book, posicionadas via JS */
 .zone {
-  position: absolute;
-  top: 0; bottom: 0;
-  width: 30%;
-  z-index: 200;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
+  position:fixed;
+  top:0; bottom:0; width:20%;
+  z-index:50; cursor:pointer;
+  display:flex; align-items:center;
 }
-#zoneL { left: 0; justify-content: flex-start; }
-#zoneR { right: 0; justify-content: flex-end; }
+#zoneL { left:0; justify-content:flex-start; }
+#zoneR { right:0; justify-content:flex-end; }
 
 .zone-arrow {
-  width: 40px; height: 40px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.88);
-  border: 1px solid rgba(160,100,40,0.2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; color: #b07030;
-  opacity: 0;
-  transition: opacity 0.2s, transform 0.18s;
-  pointer-events: none;
-  box-shadow: 0 2px 10px rgba(120,70,10,0.12);
+  width:40px; height:40px; border-radius:50%;
+  background:rgba(255,255,255,0.88);
+  border:1px solid rgba(160,100,40,0.2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:22px; color:#b07030;
+  opacity:0; transition:opacity 0.2s, transform 0.18s;
+  pointer-events:none;
+  box-shadow:0 2px 10px rgba(120,70,10,0.12);
 }
-#zoneL .zone-arrow { margin-left: 12px; }
-#zoneR .zone-arrow { margin-right: 12px; }
-#zoneL:hover .zone-arrow { opacity: 1; transform: translateX(-3px); }
-#zoneR:hover .zone-arrow { opacity: 1; transform: translateX(3px); }
-.zone.off { pointer-events: none; }
-.zone.off .zone-arrow { display: none; }
+#zoneL .zone-arrow { margin-left:12px; }
+#zoneR .zone-arrow { margin-right:12px; }
+#zoneL:hover .zone-arrow { opacity:1; transform:translateX(-3px); }
+#zoneR:hover .zone-arrow { opacity:1; transform:translateX(3px); }
+.zone.off { pointer-events:none; }
+.zone.off .zone-arrow { display:none; }
 
-/* ── TÍTULO ── */
+/* Topbar */
 #topbar {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
-  display: flex; align-items: center; justify-content: center;
-  padding: 12px 0 0; pointer-events: none;
+  position:fixed; top:0; left:0; right:0; z-index:60;
+  display:flex; align-items:center; justify-content:center;
+  padding:11px 0 0; pointer-events:none;
 }
 #topbar h1 {
-  font-size: 11px; font-weight: normal; letter-spacing: 2.5px;
-  color: #a06830; text-transform: uppercase; opacity: 0.55;
+  font-size:11px; font-weight:normal; letter-spacing:2.5px;
+  color:#a06830; text-transform:uppercase; opacity:0.55;
 }
 
-/* ── CONTROLES ── */
+/* Controles */
 #controls {
-  position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
-  display: flex; align-items: center; justify-content: center;
-  gap: 16px; padding: 8px 20px 12px;
+  position:fixed; bottom:0; left:0; right:0; z-index:60;
+  display:flex; align-items:center; justify-content:center;
+  gap:16px; padding:8px 20px 12px;
 }
-#dots { display: flex; gap: 6px; align-items: center; }
+#dots { display:flex; gap:6px; align-items:center; }
 .dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: rgba(150,90,30,0.2); cursor: pointer;
-  border: 1px solid rgba(150,90,30,0.12);
-  transition: all 0.2s;
+  width:6px; height:6px; border-radius:50%;
+  background:rgba(150,90,30,0.2); cursor:pointer;
+  border:1px solid rgba(150,90,30,0.12); transition:all 0.2s;
 }
-.dot.on { background: #d4884a; transform: scale(1.45); border-color: #d4884a; }
-#counter {
-  font-size: 10px; color: #a07040; letter-spacing: 1.5px;
-  opacity: 0.6; min-width: 42px; text-align: center;
-}
+.dot.on { background:#d4884a; transform:scale(1.45); border-color:#d4884a; }
+#counter { font-size:10px; color:#a07040; letter-spacing:1.5px; opacity:0.6; min-width:42px; text-align:center; }
 
-/* ── LOGO ── */
+/* Logo */
 #logo {
-  position: fixed; bottom: 12px; left: 12px; z-index: 300;
-  display: flex; align-items: center; gap: 4px;
-  opacity: 0.42; pointer-events: none;
+  position:fixed; bottom:12px; left:12px; z-index:60;
+  display:flex; align-items:center; gap:4px; opacity:0.42; pointer-events:none;
 }
-#logo-moon { font-size: 13px; line-height: 1; }
-#logo-text { font-size: 8px; letter-spacing: 1.3px; color: #a06830; text-transform: uppercase; line-height: 1.3; }
+#logo-moon { font-size:13px; line-height:1; }
+#logo-text { font-size:8px; letter-spacing:1.3px; color:#a06830; text-transform:uppercase; line-height:1.3; }
 
-/* ── HINT ── */
+/* Hint */
 #hint {
-  position: fixed; bottom: 42px; left: 50%; transform: translateX(-50%);
-  background: rgba(255,255,255,0.92); color: #a06830;
-  font-size: 10px; padding: 4px 12px; border-radius: 20px;
-  border: 1px solid rgba(160,100,40,0.14);
-  z-index: 300; pointer-events: none; white-space: nowrap;
-  transition: opacity 1.5s;
+  position:fixed; bottom:42px; left:50%; transform:translateX(-50%);
+  background:rgba(255,255,255,0.92); color:#a06830;
+  font-size:10px; padding:4px 12px; border-radius:20px;
+  border:1px solid rgba(160,100,40,0.14);
+  z-index:60; pointer-events:none; white-space:nowrap;
+  transition:opacity 1.5s;
 }
-#hint.out { opacity: 0; }
+#hint.out { opacity:0; }
 
-/* ── LOADER ── */
+/* Loader */
 #loader {
-  position: fixed; inset: 0; z-index: 999;
-  background: #fdf6ee;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 16px;
-  transition: opacity 0.9s;
+  position:fixed; inset:0; z-index:999;
+  background:#fdf6ee;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:16px;
+  transition:opacity 0.9s;
 }
-#loader.out { opacity: 0; pointer-events: none; }
-.moon-anim { font-size: 50px; animation: float 2s ease-in-out infinite; }
+#loader.out { opacity:0; pointer-events:none; }
+.moon-anim { font-size:50px; animation:float 2s ease-in-out infinite; }
 @keyframes float {
-  0%,100%{ transform: translateY(0) rotate(-8deg); }
-  50%{ transform: translateY(-10px) rotate(8deg); }
+  0%,100%{ transform:translateY(0) rotate(-8deg); }
+  50%{ transform:translateY(-10px) rotate(8deg); }
 }
-#loader-title { font-size: 17px; color: #c07838; letter-spacing: 2.5px; font-style: italic; opacity: 0.85; }
-#loader-sub { font-size: 10px; color: #c09060; letter-spacing: 2px; opacity: 0.5; }
+#loader-title { font-size:17px; color:#c07838; letter-spacing:2.5px; font-style:italic; opacity:0.85; }
+#loader-sub { font-size:10px; color:#c09060; letter-spacing:2px; opacity:0.5; }
 
-/* ── MOBILE ── */
-@media (max-width: 768px), (max-height: 500px) {
-  html, body { background: #111; }
-  #topbar { display: none; }
-  #book::after { display: none; }
-  .zone-arrow { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.2); color: #fff; }
-  #controls { background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-  .dot { background: rgba(255,255,255,0.2); border-color: rgba(255,255,255,0.08); }
-  .dot.on { background: #f4a835; border-color: #f4a835; }
-  #counter { color: rgba(255,255,255,0.45); }
-  #logo-text { color: rgba(255,255,255,0.38); }
-  #hint { background: rgba(0,0,0,0.55); color: rgba(255,255,255,0.65); border-color: rgba(255,255,255,0.1); }
-  #loader { background: #0d0700; }
-  #loader-title { color: #e89040; }
+/* Mobile */
+@media (max-width:768px), (max-height:500px) {
+  html,body { background:#111; }
+  #topbar { display:none; }
+  #controls { background:rgba(0,0,0,0.5); backdrop-filter:blur(4px); }
+  .dot { background:rgba(255,255,255,0.2); border-color:rgba(255,255,255,0.08); }
+  .dot.on { background:#f4a835; border-color:#f4a835; }
+  #counter { color:rgba(255,255,255,0.45); }
+  .zone-arrow { background:rgba(255,255,255,0.15); border-color:rgba(255,255,255,0.2); color:#fff; }
+  #logo-text { color:rgba(255,255,255,0.38); }
+  #hint { background:rgba(0,0,0,0.55); color:rgba(255,255,255,0.65); border-color:rgba(255,255,255,0.1); }
+  #loader { background:#0d0700; }
+  #loader-title { color:#e89040; }
+  #book { box-shadow:none; }
 }
 </style>
 </head>
@@ -237,11 +209,14 @@ html, body {
 
 <div id="stage">
   <div id="book">
+    <div id="pages"></div>
     <div id="spine"></div>
-    <div class="zone off" id="zoneL"><div class="zone-arrow">&#8249;</div></div>
-    <div class="zone"     id="zoneR"><div class="zone-arrow">&#8250;</div></div>
   </div>
 </div>
+
+<!-- Zonas FORA do #book para não serem afetadas pelo innerHTML -->
+<div class="zone off" id="zoneL"><div class="zone-arrow">&#8249;</div></div>
+<div class="zone"     id="zoneR"><div class="zone-arrow">&#8250;</div></div>
 
 <div id="hint">👆 clique nas laterais para virar a página</div>
 <div id="controls">
@@ -254,9 +229,6 @@ html, body {
 </div>
 
 <script>
-// ════════════════════════════════════════
-// IMAGENS — pares L + R por spread
-// ════════════════════════════════════════
 const SPREADS = [
   ['pascoa-da-lua/00_L.jpg','pascoa-da-lua/00_R.jpg'],
   ['pascoa-da-lua/01_L.jpg','pascoa-da-lua/01_R.jpg'],
@@ -273,277 +245,241 @@ const SPREADS = [
 ];
 const TOTAL = SPREADS.length;
 
-let cur      = 0;   // spread atual
+let cur      = 0;
 let flipping = false;
 let hintOn   = true;
+let BW = 0, BH = 0; // tamanho do livro
 
 const book      = document.getElementById('book');
+const pages     = document.getElementById('pages');
 const dotsEl    = document.getElementById('dots');
 const counterEl = document.getElementById('counter');
 const zoneL     = document.getElementById('zoneL');
 const zoneR     = document.getElementById('zoneR');
 const hintEl    = document.getElementById('hint');
 
-// ── Dots ──
-for (let i = 0; i < TOTAL; i++) {
+// Dots
+for (let i=0; i<TOTAL; i++) {
   const d = document.createElement('div');
-  d.className = 'dot' + (i===0?' on':'');
-  d.onclick = () => { if (!flipping && i !== cur) goTo(i); };
+  d.className = 'dot'+(i===0?' on':'');
+  d.onclick = () => { if(!flipping && i!==cur) goTo(i); };
   dotsEl.appendChild(d);
 }
 
-// ════════════════════════════════════════
-// TAMANHO — recalcula em qualquer resize
-// ════════════════════════════════════════
-let BW = 0, BH = 0; // largura e altura do livro
+// ── Helpers de imagem ──
+function img(src) {
+  const i = document.createElement('img');
+  i.src = src; i.alt = '';
+  return i;
+}
 
+// ── Calcula tamanho ──
 function calcSize() {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
-  const controlsH = 40;
-  const topH = window.innerWidth > 768 && window.innerHeight > 500 ? 32 : 0;
+  const mob = vw <= 768 || vh <= 500;
+  const usedH = mob ? 36 : 52;
   const availW = vw;
-  const availH = vh - controlsH - topH;
-
-  // Proporção 16:9 do spread completo
+  const availH = vh - usedH;
   let w = availW;
-  let h = Math.round(w * 9 / 16);
-  if (h > availH) { h = availH; w = Math.round(h * 16 / 9); }
-
+  let h = Math.round(w * 9/16);
+  if (h > availH) { h = availH; w = Math.round(h * 16/9); }
   BW = Math.floor(w);
   BH = Math.floor(h);
 }
 
+// ── Aplica tamanho ao livro ──
 function applySize() {
   calcSize();
-  book.style.width  = BW + 'px';
-  book.style.height = BH + 'px';
-  // Atualiza perspective
-  book.style.perspective = (BW * 2.5) + 'px';
-  // Redimensiona páginas existentes
-  document.querySelectorAll('.flip-page').forEach(p => {
-    p.style.height = BH + 'px';
-  });
+  book.style.width  = BW+'px';
+  book.style.height = BH+'px';
+  book.style.perspective = (BW*2.5)+'px';
+  pages.style.width  = BW+'px';
+  pages.style.height = BH+'px';
 }
 
-// ════════════════════════════════════════
-// ESTRUTURA DE PÁGINAS
-// Modelo: cada spread = 1 página CSS 3D
-// A página esquerda mostra spread atual (L)
-// A página direita mostra spread atual (R)
-// ════════════════════════════════════════
+// ── Renderiza spread atual (estático) ──
+function renderSpread() {
+  pages.innerHTML = '';
 
-// Cria elemento de imagem
-function makeImg(src) {
-  const img = document.createElement('img');
-  img.src = src; img.alt = '';
-  return img;
-}
+  const L = document.createElement('div');
+  L.className = 'half left';
+  L.style.height = BH+'px';
+  L.appendChild(img(SPREADS[cur][0]));
 
-// Cria uma "flip-page" com frente e verso
-// front: imagem da frente
-// back: imagem do verso (espelhada)
-function makeFlipPage(frontSrc, backSrc, isLeft) {
-  const page = document.createElement('div');
-  page.className = 'flip-page' + (isLeft ? ' left-side' : '');
-  page.style.height = BH + 'px';
+  const R = document.createElement('div');
+  R.className = 'half right';
+  R.style.height = BH+'px';
+  R.appendChild(img(SPREADS[cur][1]));
 
-  const front = document.createElement('div');
-  front.className = 'face front';
-  front.appendChild(makeImg(frontSrc));
-
-  const back = document.createElement('div');
-  back.className = 'face back';
-  back.appendChild(makeImg(backSrc));
-
-  page.appendChild(front);
-  page.appendChild(back);
-  return page;
-}
-
-// ════════════════════════════════════════
-// RENDERIZAÇÃO DO SPREAD
-// Abordagem simples e robusta:
-// Mostra sempre o spread atual como duas
-// metades estáticas. O flip é uma animação
-// CSS que "vira" a metade que muda.
-// ════════════════════════════════════════
-let leftHalf  = null;
-let rightHalf = null;
-let flipLayer = null; // a página virando
-
-function buildInitial() {
-  // Cria duas metades estáticas do spread atual
-  leftHalf = document.createElement('div');
-  leftHalf.className = 'flip-page';
-  leftHalf.style.cssText = `left:0; width:50%; height:${BH}px; transform-origin:right center; transform:rotateY(0deg); z-index:1;`;
-  const lf = document.createElement('div');
-  lf.className = 'face front';
-  lf.appendChild(makeImg(SPREADS[cur][0]));
-  leftHalf.appendChild(lf);
-
-  rightHalf = document.createElement('div');
-  rightHalf.className = 'flip-page';
-  rightHalf.style.cssText = `left:50%; width:50%; height:${BH}px; transform-origin:left center; transform:rotateY(0deg); z-index:1;`;
-  const rf = document.createElement('div');
-  rf.className = 'face front';
-  rf.appendChild(makeImg(SPREADS[cur][1]));
-  rightHalf.appendChild(rf);
-
-  book.appendChild(leftHalf);
-  book.appendChild(rightHalf);
-}
-
-// ════════════════════════════════════════
-// FLIP ANIMATION
-// ════════════════════════════════════════
-function flip(dir) {
-  if (flipping || (dir === -1 && cur === 0) || (dir === 1 && cur === TOTAL-1)) return;
-  flipping = true;
-  hideHint();
-
-  const next = cur + dir;
-  const fwd  = dir > 0;
-
-  if (fwd) {
-    // Virar para frente:
-    // A metade DIREITA do spread atual vira para a esquerda
-    // revelando a metade ESQUERDA do próximo spread
-
-    // 1. Página virando: frente = R atual, verso = L próximo
-    flipLayer = document.createElement('div');
-    flipLayer.style.cssText = `
-      position:absolute; top:0; left:50%; width:50%; height:${BH}px;
-      transform-style:preserve-3d; transform-origin:left center;
-      transform:rotateY(0deg); z-index:10; transition:transform 0.7s cubic-bezier(0.645,0.045,0.355,1.000);
-    `;
-
-    // Frente: R do spread atual
-    const fFront = document.createElement('div');
-    fFront.className = 'face front';
-    fFront.appendChild(makeImg(SPREADS[cur][1]));
-
-    // Verso: L do próximo spread (espelhado)
-    const fBack = document.createElement('div');
-    fBack.className = 'face back';
-    const bImg = makeImg(SPREADS[next][0]);
-    fBack.appendChild(bImg);
-
-    flipLayer.appendChild(fFront);
-    flipLayer.appendChild(fBack);
-    book.appendChild(flipLayer);
-
-    // 2. Coloca a nova R (próximo) atrás como base
-    const newRight = document.createElement('div');
-    newRight.style.cssText = `
-      position:absolute; top:0; left:50%; width:50%; height:${BH}px; z-index:0;
-      overflow:hidden;
-    `;
-    newRight.appendChild(makeImg(SPREADS[next][1]));
-    book.appendChild(newRight);
-
-    // 3. Dispara a animação
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        flipLayer.style.transform = 'rotateY(-180deg)';
-      });
-    });
-
-    // 4. Após terminar
-    flipLayer.addEventListener('transitionend', () => {
-      cur = next;
-      // Limpa e reconstrói
-      book.innerHTML = '';
-      book.appendChild(document.getElementById('spine'));
-      book.appendChild(document.getElementById('zoneL'));
-      book.appendChild(document.getElementById('zoneR'));
-      buildInitial();
-      updateUI();
-      flipping = false;
-    }, { once: true });
-
-  } else {
-    // Virar para trás:
-    // A metade ESQUERDA do spread atual vira para a direita
-    // revelando a metade DIREITA do spread anterior
-
-    flipLayer = document.createElement('div');
-    flipLayer.style.cssText = `
-      position:absolute; top:0; left:0; width:50%; height:${BH}px;
-      transform-style:preserve-3d; transform-origin:right center;
-      transform:rotateY(0deg); z-index:10; transition:transform 0.7s cubic-bezier(0.645,0.045,0.355,1.000);
-    `;
-
-    const fFront = document.createElement('div');
-    fFront.className = 'face front';
-    fFront.appendChild(makeImg(SPREADS[cur][0]));
-
-    const fBack = document.createElement('div');
-    fBack.className = 'face back';
-    fBack.appendChild(makeImg(SPREADS[next][1]));
-
-    flipLayer.appendChild(fFront);
-    flipLayer.appendChild(fBack);
-    book.appendChild(flipLayer);
-
-    const newLeft = document.createElement('div');
-    newLeft.style.cssText = `
-      position:absolute; top:0; left:0; width:50%; height:${BH}px; z-index:0;
-      overflow:hidden;
-    `;
-    newLeft.appendChild(makeImg(SPREADS[next][0]));
-    book.appendChild(newLeft);
-
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        flipLayer.style.transform = 'rotateY(180deg)';
-      });
-    });
-
-    flipLayer.addEventListener('transitionend', () => {
-      cur = next;
-      book.innerHTML = '';
-      book.appendChild(document.getElementById('spine'));
-      book.appendChild(document.getElementById('zoneL'));
-      book.appendChild(document.getElementById('zoneR'));
-      buildInitial();
-      updateUI();
-      flipping = false;
-    }, { once: true });
-  }
-}
-
-function goTo(target) {
-  if (flipping || target === cur) return;
-  flip(target > cur ? 1 : -1);
+  pages.appendChild(L);
+  pages.appendChild(R);
 }
 
 // ── UI ──
 function updateUI() {
   counterEl.textContent = `${cur+1} / ${TOTAL}`;
-  dotsEl.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('on', i===cur));
+  dotsEl.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('on',i===cur));
   zoneL.classList.toggle('off', cur===0);
   zoneR.classList.toggle('off', cur===TOTAL-1);
 }
 
-// ── Controles ──
-zoneL.onclick = () => flip(-1);
-zoneR.onclick = () => flip(1);
+// ══════════════════════════════════════
+// FLIP — CSS 3D, sem tocar no DOM fixo
+// ══════════════════════════════════════
+function flip(dir) {
+  if (flipping) return;
+  const next = cur + dir;
+  if (next<0 || next>=TOTAL) return;
 
-document.addEventListener('keydown', e => {
-  if (e.key==='ArrowRight'||e.key==='ArrowDown') flip(1);
-  if (e.key==='ArrowLeft' ||e.key==='ArrowUp')   flip(-1);
+  flipping = true;
+  hideHint();
+
+  const fwd = dir > 0;
+  const hw  = Math.floor(BW/2); // largura de meia página
+
+  if (fwd) {
+    // ── AVANÇAR ──
+    // Frente da folha virando = R do spread atual
+    // Verso da folha virando  = L do próximo spread
+    // Depois da animação, R do spread atual -> R do próximo
+
+    // 1. Coloca o novo L embaixo (já visível à esquerda)
+    const newL = document.createElement('div');
+    newL.className = 'half left';
+    newL.style.cssText = `height:${BH}px; z-index:0;`;
+    newL.appendChild(img(SPREADS[next][0]));
+    pages.appendChild(newL);
+
+    // 2. Coloca o novo R embaixo à direita
+    const newR = document.createElement('div');
+    newR.className = 'half right';
+    newR.style.cssText = `height:${BH}px; z-index:0;`;
+    newR.appendChild(img(SPREADS[next][1]));
+    pages.appendChild(newR);
+
+    // 3. Cria a folha virando (sobre tudo)
+    const flipEl = document.createElement('div');
+    flipEl.className = 'flipping';
+    flipEl.style.cssText = `
+      left:50%; width:${hw}px; height:${BH}px;
+      transform-origin:left center;
+      transform:rotateY(0deg);
+      transition:transform 0.65s cubic-bezier(0.645,0.045,0.355,1.000);
+    `;
+
+    // Frente: R atual
+    const front = document.createElement('div');
+    front.className = 'face front';
+    front.appendChild(img(SPREADS[cur][1]));
+
+    // Verso: L próximo (espelhado pelo CSS backface)
+    const back = document.createElement('div');
+    back.className = 'face back';
+    // Precisa espelhar a imagem para ficar correta quando virada
+    const bImg = img(SPREADS[next][0]);
+    bImg.style.transform = 'scaleX(-1)';
+    back.appendChild(bImg);
+
+    flipEl.appendChild(front);
+    flipEl.appendChild(back);
+    pages.appendChild(flipEl);
+
+    // 4. Dispara animação no próximo frame
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        flipEl.style.transform = 'rotateY(-180deg)';
+      });
+    });
+
+    // 5. Após animação
+    flipEl.addEventListener('transitionend', ()=>{
+      cur = next;
+      renderSpread();
+      updateUI();
+      flipping = false;
+    }, {once:true});
+
+  } else {
+    // ── VOLTAR ──
+    // Frente da folha virando = L do spread atual
+    // Verso da folha virando  = R do spread anterior
+
+    // 1. Coloca novo spread embaixo
+    const newL = document.createElement('div');
+    newL.className = 'half left';
+    newL.style.cssText = `height:${BH}px; z-index:0;`;
+    newL.appendChild(img(SPREADS[next][0]));
+    pages.appendChild(newL);
+
+    const newR = document.createElement('div');
+    newR.className = 'half right';
+    newR.style.cssText = `height:${BH}px; z-index:0;`;
+    newR.appendChild(img(SPREADS[next][1]));
+    pages.appendChild(newR);
+
+    // 2. Cria folha virando
+    const flipEl = document.createElement('div');
+    flipEl.className = 'flipping';
+    flipEl.style.cssText = `
+      left:0; width:${hw}px; height:${BH}px;
+      transform-origin:right center;
+      transform:rotateY(0deg);
+      transition:transform 0.65s cubic-bezier(0.645,0.045,0.355,1.000);
+    `;
+
+    const front = document.createElement('div');
+    front.className = 'face front';
+    front.appendChild(img(SPREADS[cur][0]));
+
+    const back = document.createElement('div');
+    back.className = 'face back';
+    const bImg = img(SPREADS[next][1]);
+    bImg.style.transform = 'scaleX(-1)';
+    back.appendChild(bImg);
+
+    flipEl.appendChild(front);
+    flipEl.appendChild(back);
+    pages.appendChild(flipEl);
+
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        flipEl.style.transform = 'rotateY(180deg)';
+      });
+    });
+
+    flipEl.addEventListener('transitionend', ()=>{
+      cur = next;
+      renderSpread();
+      updateUI();
+      flipping = false;
+    }, {once:true});
+  }
+}
+
+function goTo(target) {
+  if (flipping || target===cur) return;
+  flip(target>cur ? 1 : -1);
+}
+
+// ── Controles ──
+zoneL.onclick = ()=>flip(-1);
+zoneR.onclick = ()=>flip(1);
+
+document.addEventListener('keydown', e=>{
+  if(e.key==='ArrowRight'||e.key==='ArrowDown') flip(1);
+  if(e.key==='ArrowLeft' ||e.key==='ArrowUp')   flip(-1);
 });
 
-let tx0=0, ty0=0, tt0=0;
-document.addEventListener('touchstart', e=>{
+let tx0=0,ty0=0,tt0=0;
+document.addEventListener('touchstart',e=>{
   tx0=e.touches[0].clientX; ty0=e.touches[0].clientY; tt0=Date.now();
 },{passive:true});
-document.addEventListener('touchend', e=>{
+document.addEventListener('touchend',e=>{
   if(flipping) return;
   const dx=e.changedTouches[0].clientX-tx0;
   const dy=e.changedTouches[0].clientY-ty0;
-  if(Math.abs(dx)>40 && Math.abs(dx)>Math.abs(dy) && Date.now()-tt0<500)
+  if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)&&Date.now()-tt0<500)
     flip(dx<0?1:-1);
 },{passive:true});
 
@@ -552,32 +488,27 @@ setTimeout(hideHint, 5000);
 
 // ── Resize / Orientação ──
 let rsTimer;
-function onResize() {
+function onResize(){
   clearTimeout(rsTimer);
-  rsTimer = setTimeout(() => {
+  rsTimer=setTimeout(()=>{
     applySize();
-    // Reconstrói páginas com novo tamanho
-    book.innerHTML = '';
-    book.appendChild(document.getElementById('spine'));
-    book.appendChild(document.getElementById('zoneL'));
-    book.appendChild(document.getElementById('zoneR'));
-    buildInitial();
+    renderSpread();
     updateUI();
-  }, 300);
+  },300);
 }
 window.addEventListener('resize', onResize);
-window.addEventListener('orientationchange', ()=>setTimeout(onResize, 450));
-if(window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
+window.addEventListener('orientationchange',()=>setTimeout(onResize,450));
+if(window.visualViewport) window.visualViewport.addEventListener('resize',onResize);
 
-if ('serviceWorker' in navigator) {
+if('serviceWorker' in navigator){
   navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
 // ── Inicia ──
 applySize();
-buildInitial();
+renderSpread();
 updateUI();
-setTimeout(() => document.getElementById('loader').classList.add('out'), 600);
+setTimeout(()=>document.getElementById('loader').classList.add('out'), 500);
 </script>
 </body>
 </html>
